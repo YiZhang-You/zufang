@@ -206,6 +206,11 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
 
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+
+# FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+
 # # 日志配置（日志级别越低内容越详细）
 # LOGGING = {
 #     'version': 1,

@@ -9,6 +9,7 @@ from io import BytesIO
 
 import qrcode
 import requests
+from PIL.Image import Image
 from qiniu import Auth, put_file, put_stream
 
 
@@ -34,6 +35,21 @@ def gen_captcha_text(length=4):
         '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ',
         k=length)
     )
+
+
+def make_thumbnail(image_file, path, size, keep=True):
+    """生成缩略图"""
+    image = Image.open(image_file)
+    origin_width, origin_height = image.size
+    if keep:
+        target_width, target_height = size
+        w_rate, h_rate = target_width / origin_width, target_height / origin_height
+        rate = w_rate if w_rate < h_rate else h_rate
+        width, height = int(origin_width * rate), int(origin_height * rate)
+    else:
+        width, height = size
+    image.thumbnail((width, height))
+    image.save(path)
 
 
 def gen_qrcode(data):
