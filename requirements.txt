@@ -15,6 +15,5 @@ requests
 celery
 itsdangerous
 elasticsearch
-alipay-sdk-python
 PyMySQL
 pillow

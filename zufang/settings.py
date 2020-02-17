@@ -131,17 +131,18 @@ WSGI_APPLICATION = 'zufang.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'zufang',
-#         'HOST': '1.2.3.4',
-#         'PORT': 3306,
-#         'USER': 'your_username',
-#         'PASSWORD': 'your_password',
-#         'CHARSET': 'utf8'
-#     },
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zufang',
+        'HOST': '120.77.222.217',
+        'PORT': 3306,
+        'USER': 'luohao',
+        'PASSWORD': 'Luohao.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/Shanghai',
+    },
+}
 
 # # 数据库路由配置
 # DATABASE_ROUTERS = []
