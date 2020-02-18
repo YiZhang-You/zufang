@@ -4,13 +4,23 @@
 from django.db import models
 
 
+# class BaseModel(models.Model):
+#     """自定义模型的基类（保存公共字段和方法）"""
+#     create_time = models.DateTimeField(auto_now_add=True)
+#     update_time = models.DateTimeField(auto_now=True)
+#     deleted = models.BooleanField(default=False)
+#
+#     class Meta:
+#         abstract = True
+
+
 class User(models.Model):
     """用户"""
     # 用户ID
     userid = models.AutoField(primary_key=True)
     # 用户名
     username = models.CharField(unique=True, max_length=20)
-    # 用户密码（数据库中保存MD5摘要）
+    # 用户密码（数据库中保存MD5摘要，登录时比较密码的签名）
     password = models.CharField(max_length=32)
     # 用户真实姓名
     realname = models.CharField(max_length=20)
