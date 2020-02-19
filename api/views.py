@@ -24,5 +24,3 @@ def get_cities(request: HttpRequest, distid) -> HttpResponse:
         .defer('parent').first()
     serializer = DistrictDetailSerializer(district)
     return Response(serializer.data)
-
-

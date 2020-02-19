@@ -4,6 +4,7 @@ djangorestframework
 django-filter
 django-cors-headers
 django-imagekit
+django-debug-toolbar
 PyJWT
 qiniu
 qrcode
