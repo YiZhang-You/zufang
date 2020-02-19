@@ -1,6 +1,3 @@
-import re
-
-from django.http import HttpRequest, HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.generics import RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework.response import Response
@@ -10,7 +7,7 @@ from common.models import District, Agent
 
 
 @api_view(('GET', ))
-def get_provinces(request: HttpRequest) -> HttpResponse:
+def get_provinces(request):
     queryset = District.objects.filter(parent__isnull=True)\
         .only('name')
     serializer = DistrictSimpleSerializer(queryset, many=True)
@@ -22,7 +19,7 @@ def get_provinces(request: HttpRequest) -> HttpResponse:
 
 
 @api_view(('GET', ))
-def get_district(request: HttpRequest, distid) -> HttpResponse:
+def get_district(request, distid):
     district = District.objects.filter(distid=distid)\
         .defer('parent').first()
     serializer = DistrictDetailSerializer(district)
