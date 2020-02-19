@@ -8,6 +8,7 @@ from common.models import District, Agent
 
 @api_view(('GET', ))
 def get_provinces(request):
+    """获取省级行政单位"""
     queryset = District.objects.filter(parent__isnull=True)\
         .only('name')
     serializer = DistrictSimpleSerializer(queryset, many=True)
@@ -20,6 +21,7 @@ def get_provinces(request):
 
 @api_view(('GET', ))
 def get_district(request, distid):
+    """获取地区详情"""
     district = District.objects.filter(distid=distid)\
         .defer('parent').first()
     serializer = DistrictDetailSerializer(district)
@@ -27,6 +29,7 @@ def get_district(request, distid):
 
 
 class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
+    """经理人视图"""
 
     def get_queryset(self):
         queryset = Agent.objects.all()

@@ -4,6 +4,7 @@ from common.models import District, Agent, Estate
 
 
 class DistrictSimpleSerializer(serializers.ModelSerializer):
+    """地区简单序列化器"""
 
     class Meta:
         model = District
@@ -11,6 +12,7 @@ class DistrictSimpleSerializer(serializers.ModelSerializer):
 
 
 class DistrictDetailSerializer(serializers.ModelSerializer):
+    """地区详情序列化器"""
     cities = serializers.SerializerMethodField()
 
     @staticmethod
@@ -24,6 +26,7 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
 
 
 class AgentSimpleSerializer(serializers.ModelSerializer):
+    """经理人简单序列化器"""
 
     class Meta:
         model = Agent
@@ -31,6 +34,7 @@ class AgentSimpleSerializer(serializers.ModelSerializer):
 
 
 class AgentCreateSerializer(serializers.ModelSerializer):
+    """创建经理人序列化器"""
 
     class Meta:
         model = Agent
@@ -38,6 +42,7 @@ class AgentCreateSerializer(serializers.ModelSerializer):
 
 
 class AgentDetailSerializer(serializers.ModelSerializer):
+    """经理人详情序列化器"""
     estates = serializers.SerializerMethodField()
 
     @staticmethod
@@ -51,6 +56,7 @@ class AgentDetailSerializer(serializers.ModelSerializer):
 
 
 class EstateSimpleSerializer(serializers.ModelSerializer):
+    """楼盘简单序列化器"""
 
     class Meta:
         model = Estate
