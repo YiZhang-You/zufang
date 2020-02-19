@@ -47,7 +47,7 @@ class AgentDetailSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_estates(agent):
-        queryset = agent.estates.all().only('name')
+        queryset = agent.estates.all()
         return EstateSimpleSerializer(queryset, many=True).data
 
     class Meta:
