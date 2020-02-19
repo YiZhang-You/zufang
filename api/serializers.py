@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from common.models import District
+from common.models import District, Agent, Estate
 
 
 class DistrictSimpleSerializer(serializers.ModelSerializer):
@@ -21,3 +21,37 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = District
         exclude = ('parent', )
+
+
+class AgentSimpleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Agent
+        fields = ('agentid', 'name', 'tel', 'servstar')
+
+
+class AgentCreateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Agent
+        exclude = ('estates', )
+
+
+class AgentDetailSerializer(serializers.ModelSerializer):
+    estates = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_estates(agent):
+        queryset = agent.estates.all().only('name')
+        return EstateSimpleSerializer(queryset, many=True).data
+
+    class Meta:
+        model = Agent
+        fields = '__all__'
+
+
+class EstateSimpleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Estate
+        fields = ('estateid', 'name')
