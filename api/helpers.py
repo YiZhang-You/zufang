@@ -9,4 +9,4 @@ class CustomPagePagination(PageNumberPagination):
 class AgentCursorPagination(CursorPagination):
     page_size_query_param = 'size'
     max_page_size = 50
-    ordering = 'agentid'
+    ordering = '-agentid'
