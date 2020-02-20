@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from rest_framework.decorators import api_view
 from rest_framework.generics import RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework.response import Response
@@ -39,7 +40,10 @@ class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
         if 'pk' not in self.kwargs:
             queryset = queryset.only('name', 'tel', 'servstar')
         else:
-            queryset = queryset.prefetch_related('estates')
+            queryset = queryset.prefetch_related(
+                Prefetch('estates',
+                         queryset=Estate.objects.all().only('name').order_by('-hot'))
+            )
         return queryset.order_by('-servstar')
 
     def get_serializer_class(self):
