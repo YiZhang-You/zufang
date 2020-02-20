@@ -46,14 +46,13 @@ def get_district(request, distid):
     redis_cli = get_redis_connection()
     data = redis_cli.get(f'zufang:district:{distid}')
     if data:
-        district = pickle.loads(data)
-    else:
+        data = json.loads(data)
+    if not data:
         district = District.objects.filter(distid=distid)\
             .defer('parent').first()
-        data = pickle.dumps(district)
-        redis_cli.set(f'zufang:district:{distid}', data, ex=900)
-    serializer = DistrictDetailSerializer(district)
-    return Response(serializer.data)
+        data = DistrictDetailSerializer(district).data
+        redis_cli.set(f'zufang:district:{distid}', json.dumps(data), ex=900)
+    return Response(data)
 
 
 class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
