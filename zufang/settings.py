@@ -80,7 +80,7 @@ REST_FRAMEWORK = {
     # 配置默认页面大小
     'PAGE_SIZE': 5,
     # 配置默认的分页类
-    'DEFAULT_PAGINATION_CLASS': 'api.helpers.CustomPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.helpers.CustomPagePagination',
     # # 配置默认的过滤和排序类
     # 'DEFAULT_FILTER_BACKENDS': (
     #     'django_filters.rest_framework.DjangoFilterBackend',

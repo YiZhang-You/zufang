@@ -3,6 +3,7 @@ from rest_framework.generics import RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
+from api.helpers import AgentCursorPagination
 from api.serializers import *
 from common.models import District, Agent, HouseType
 
@@ -31,6 +32,7 @@ def get_district(request, distid):
 
 class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
     """经理人视图"""
+    pagination_class = AgentCursorPagination
 
     def get_queryset(self):
         queryset = Agent.objects.all()
