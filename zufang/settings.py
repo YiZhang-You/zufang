@@ -74,26 +74,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'zufang.wsgi.application'
 
-# # djangorestframework的配置
-# REST_FRAMEWORK = {
-#     # 配置默认页面大小
-#     'PAGE_SIZE': 5,
-#     # 配置默认的分页类
-#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-#     # # 配置默认的过滤和排序类
-#     # 'DEFAULT_FILTER_BACKENDS': (
-#     #     'django_filters.rest_framework.DjangoFilterBackend',
-#     #     'rest_framework.filters.OrderingFilter',
-#     # ),
-#     # 'DEFAULT_THROTTLE_CLASSES': (
-#     #     'rest_framework.throttling.AnonRateThrottle',
-#     #     'rest_framework.throttling.UserRateThrottle'
-#     # ),
-#     # 'DEFAULT_THROTTLE_RATES': {
-#     #     'anon': '3/min',
-#     #     'user': '10000/day'
-#     # }
-# }
+
+# djangorestframework的配置
+REST_FRAMEWORK = {
+    # 配置默认页面大小
+    'PAGE_SIZE': 5,
+    # 配置默认的分页类
+    'DEFAULT_PAGINATION_CLASS': 'api.helpers.CustomPagination',
+    # # 配置默认的过滤和排序类
+    # 'DEFAULT_FILTER_BACKENDS': (
+    #     'django_filters.rest_framework.DjangoFilterBackend',
+    #     'rest_framework.filters.OrderingFilter',
+    # ),
+    # 'DEFAULT_THROTTLE_CLASSES': (
+    #     'rest_framework.throttling.AnonRateThrottle',
+    #     'rest_framework.throttling.UserRateThrottle'
+    # ),
+    # 'DEFAULT_THROTTLE_RATES': {
+    #     'anon': '3/min',
+    #     'user': '10000/day'
+    # }
+}
 
 # 调试工具栏
 DEBUG_TOOLBAR_CONFIG = {
@@ -152,21 +153,21 @@ DATABASES = {
 # DATABASE_ROUTERS = []
 
 # 缓存配置
-# CACHES = {
-#     'default': {
-#         'BACKEND': 'django_redis.cache.RedisCache',
-#         'LOCATION': [
-#             'redis://1.2.3.4:6379/0',
-#         ],
-#         'KEY_PREFIX': 'zufang',
-#         'OPTIONS': {
-#             'CLIENT_CLASS': 'django_redis.client.DefaultClient',
-#             'CONNECTION_POOL_KWARGS': {
-#                 'max_connections': 2048,
-#             },
-#         }
-#     },
-# }
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': [
+            'redis://120.77.222.217:6379/0',
+        ],
+        'KEY_PREFIX': 'zufang',
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'CONNECTION_POOL_KWARGS': {
+                'max_connections': 2048,
+            },
+        }
+    },
+}
 
 # 会话相关配置
 # SESSION_ENGINE = 'django.contrib.sessions.backends.cache'

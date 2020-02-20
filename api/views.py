@@ -1,9 +1,10 @@
 from rest_framework.decorators import api_view
 from rest_framework.generics import RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from api.serializers import *
-from common.models import District, Agent
+from common.models import District, Agent, HouseType
 
 
 @api_view(('GET', ))
@@ -35,7 +36,9 @@ class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
         queryset = Agent.objects.all()
         if 'pk' not in self.kwargs:
             queryset = queryset.only('name', 'tel', 'servstar')
-        return queryset
+        else:
+            queryset = queryset.prefetch_related('estates')
+        return queryset.order_by('-servstar')
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -46,3 +49,27 @@ class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
     def get(self, request, *args, **kwargs):
         cls = RetrieveUpdateAPIView if 'pk' in kwargs else ListCreateAPIView
         return cls.get(self, request, *args, **kwargs)
+
+
+class HouseTypeViewSet(ModelViewSet):
+    """户型视图集"""
+    queryset = HouseType.objects.all()
+    serializer_class = HouseTypeSerializer
+    pagination_class = None
+
+
+class EstateViewSet(ReadOnlyModelViewSet):
+    """楼盘视图集"""
+    queryset = Estate.objects.all()
+
+    def get_queryset(self):
+        if self.action == 'list':
+            queryset = self.queryset.only('name')
+        else:
+            queryset = self.queryset\
+                .defer('district__parent', 'district__ishot', 'district__intro')\
+                .select_related('district')
+        return queryset
+
+    def get_serializer_class(self):
+        return EstateDetailSerializer if self.action == 'retrieve' else EstateSimpleSerializer
