@@ -35,7 +35,7 @@ def get_provinces(request):
 #     district = caches['default'].get(f'district:{distid}')
 #     if district is None:
 #         district = District.objects.filter(distid=distid).first()
-#         caches['default'].set(f'district:{distid}', district, ex=900)
+#         caches['default'].set(f'district:{distid}', district, timeout=900)
 #     serializer = DistrictDetailSerializer(district)
 #     return Response(serializer.data)
 
