@@ -1,5 +1,6 @@
 import pickle
 
+from django.core.cache import caches
 from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
@@ -34,7 +35,7 @@ def get_provinces(request):
 #     district = caches['default'].get(f'district:{distid}')
 #     if district is None:
 #         district = District.objects.filter(distid=distid).first()
-#         caches['default'].set(f'district:{distid}', district)
+#         caches['default'].set(f'district:{distid}', district, ex=900)
 #     serializer = DistrictDetailSerializer(district)
 #     return Response(serializer.data)
 
@@ -50,7 +51,7 @@ def get_district(request, distid):
         district = District.objects.filter(distid=distid)\
             .defer('parent').first()
         data = pickle.dumps(district)
-        redis_cli.set(f'zufang:district:{distid}', data)
+        redis_cli.set(f'zufang:district:{distid}', data, ex=900)
     serializer = DistrictDetailSerializer(district)
     return Response(serializer.data)
 
@@ -92,7 +93,7 @@ class HouseTypeViewSet(ModelViewSet):
 
 @method_decorator(decorator=cache_page(timeout=86400), name='list')
 @method_decorator(decorator=cache_page(timeout=86400), name='retrieve')
-class EstateViewSet(ModelViewSet):
+class EstateViewSet(ReadOnlyModelViewSet):
     """楼盘视图集"""
     queryset = Estate.objects.all()
 

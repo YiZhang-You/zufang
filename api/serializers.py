@@ -27,7 +27,7 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
         if not data:
             queryset = District.objects.filter(parent=district).only('name')
             data = DistrictSimpleSerializer(queryset, many=True).data
-            redis_cli.set(f'zufang:district:{district.distid}:cities', json.dumps(data))
+            redis_cli.set(f'zufang:district:{district.distid}:cities', json.dumps(data), ex=900)
         return data
 
     class Meta:
