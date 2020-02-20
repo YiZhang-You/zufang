@@ -47,7 +47,8 @@ def get_district(request, distid):
     if data:
         district = pickle.loads(data)
     else:
-        district = District.objects.filter(distid=distid).first()
+        district = District.objects.filter(distid=distid)\
+            .defer('parent').first()
         data = pickle.dumps(district)
         redis_cli.set(f'zufang:district:{distid}', data)
     serializer = DistrictDetailSerializer(district)

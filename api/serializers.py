@@ -1,3 +1,6 @@
+import json
+
+from django_redis import get_redis_connection
 from rest_framework import serializers
 
 from common.models import District, Agent, Estate, HouseType
@@ -17,8 +20,15 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def get_cities(district):
-        queryset = District.objects.filter(parent=district).only('name')
-        return DistrictSimpleSerializer(queryset, many=True).data
+        redis_cli = get_redis_connection()
+        data = redis_cli.get(f'zufang:district:{district.distid}:cities')
+        if data:
+            data = json.loads(data)
+        if not data:
+            queryset = District.objects.filter(parent=district).only('name')
+            data = DistrictSimpleSerializer(queryset, many=True).data
+            redis_cli.set(f'zufang:district:{district.distid}:cities', json.dumps(data))
+        return data
 
     class Meta:
         model = District
