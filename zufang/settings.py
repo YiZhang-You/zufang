@@ -106,32 +106,32 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': lambda x: True,
 }
 
-# 配置允许跨域访问接口数据
-CORS_ORIGIN_ALLOW_ALL = True
+# # 配置允许跨域访问接口数据
+# CORS_ORIGIN_ALLOW_ALL = True
+#
+# # 跨域访问允许的请求头
+# CORS_ALLOW_HEADERS = (
+#     'accept',
+#     'accept-encoding',
+#     'authorization',
+#     'content-type',
+#     'dnt',
+#     'origin',
+#     'user-agent',
+#     'x-csrftoken',
+#     'x-requested-with',
+#     'token',
+# )
 
-# 跨域访问允许的请求头
-CORS_ALLOW_HEADERS = (
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
-    'token',
-)
-
-# 跨域访问支持的HTTP请求方法
-CORS_ALLOW_METHODS = (
-    'DELETE',
-    'GET',
-    'OPTIONS',
-    'PATCH',
-    'POST',
-    'PUT',
-)
+# # 跨域访问支持的HTTP请求方法
+# CORS_ALLOW_METHODS = (
+#     'DELETE',
+#     'GET',
+#     'OPTIONS',
+#     'PATCH',
+#     'POST',
+#     'PUT',
+# )
 
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
