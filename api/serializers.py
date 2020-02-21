@@ -24,7 +24,7 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
         data = redis_cli.get(f'zufang:district:{district.distid}:cities')
         if data:
             data = json.loads(data)
-        if not data:
+        else:
             queryset = District.objects.filter(parent=district).only('name')
             data = DistrictSimpleSerializer(queryset, many=True).data
             redis_cli.set(f'zufang:district:{district.distid}:cities', json.dumps(data), ex=900)

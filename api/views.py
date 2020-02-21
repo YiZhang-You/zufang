@@ -1,5 +1,3 @@
-import pickle
-
 from django.core.cache import caches
 from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
@@ -47,7 +45,7 @@ def get_district(request, distid):
     data = redis_cli.get(f'zufang:district:{distid}')
     if data:
         data = json.loads(data)
-    if not data:
+    else:
         district = District.objects.filter(distid=distid)\
             .defer('parent').first()
         data = DistrictDetailSerializer(district).data
