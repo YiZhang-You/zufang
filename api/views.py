@@ -2,13 +2,15 @@ from django.core.cache import caches
 from django.db.models import Prefetch
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
+from django_filters.rest_framework import DjangoFilterBackend
 from django_redis import get_redis_connection
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, throttle_classes
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import RetrieveUpdateAPIView, ListCreateAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
-from api.helpers import AgentCursorPagination
+from api.helpers import AgentCursorPagination, EstateFilterSet
 from api.serializers import *
 from common.models import District, Agent, HouseType
 
@@ -55,10 +57,16 @@ def get_district(request, distid):
 
 class AgentView(RetrieveUpdateAPIView, ListCreateAPIView):
     """经理人视图"""
-    pagination_class = AgentCursorPagination
+    # pagination_class = AgentCursorPagination
 
     def get_queryset(self):
         queryset = Agent.objects.all()
+        name = self.request.GET.get('name')
+        if name:
+            queryset = queryset.filter(name__startswith=name)
+        servstar = self.request.GET.get('servstar')
+        if servstar:
+            queryset = queryset.filter(servstar__gte=servstar)
         if 'pk' not in self.kwargs:
             queryset = queryset.only('name', 'tel', 'servstar')
         else:
@@ -93,6 +101,11 @@ class HouseTypeViewSet(ModelViewSet):
 class EstateViewSet(ReadOnlyModelViewSet):
     """楼盘视图集"""
     queryset = Estate.objects.all()
+    filter_backends = (DjangoFilterBackend, OrderingFilter)
+    # filter_fields = ('name', 'hot', 'district')
+    filterset_class = EstateFilterSet
+    ordering = '-hot'
+    ordering_fields = ('district', 'hot', 'name')
 
     def get_queryset(self):
         if self.action == 'list':

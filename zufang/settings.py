@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'debug_toolbar',
     'rest_framework',
+    'django_filters',
     'common',
     'api',
 ]
@@ -88,11 +89,11 @@ REST_FRAMEWORK = {
     # ),
     # 'DEFAULT_THROTTLE_CLASSES': (
     #     'rest_framework.throttling.AnonRateThrottle',
-    #     'rest_framework.throttling.UserRateThrottle'
+    #     'rest_framework.throttling.UserRateThrottle',
     # ),
     # 'DEFAULT_THROTTLE_RATES': {
-    #     'anon': '3/min',
-    #     'user': '10000/day'
+    #     'anon': '30/min',
+    #     'user': '10000/day',
     # }
 }
 
