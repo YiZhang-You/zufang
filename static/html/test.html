@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
 <body>
-    <h1>Hello, world!</h1>
+    <h1>前后端代码联调 - Vue + Element UI</h1>
     <hr>
     <div id="app1">
         <el-select v-model="provId" filterable placeholder="请选择" @change="selectProv">
@@ -55,12 +55,20 @@
                     prop="servstar"
                     label="服务星级"
                     width="280">
+                <el-template slot-scope="scope">
+                    <el-rate
+                            disabled
+                            v-model="scope.row.servstar"
+                            :colors="['#ffc0c0', '#ffa0a0', '#ff0000']">
+                    </el-rate>
+                </el-template>
             </el-table-column>
         </el-table>
         <el-pagination
-                small layout="prev, pager, next"
+                layout="prev, pager, next"
                 page-size="5"
                 :total="count"
+                @current-change="handleCurrentChange"
                 @prev-click="loadData(prevPage)"
                 @next-click="loadData(nextPage)">
         </el-pagination>
@@ -116,6 +124,9 @@
                 this.loadData('/api/agents/')
             },
             methods: {
+                handleCurrentChange(currentPage) {
+                    this.loadData('/api/agents/?page=' + currentPage)
+                },
                 loadData(url) {
                     if (url) {
                         fetch(url)
