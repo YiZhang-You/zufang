@@ -78,6 +78,7 @@ WSGI_APPLICATION = 'zufang.wsgi.application'
 
 # djangorestframework的配置
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     # 配置默认页面大小
     'PAGE_SIZE': 5,
     # 配置默认的分页类

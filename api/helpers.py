@@ -1,7 +1,8 @@
+from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination, CursorPagination
 from django_filters import filterset
 
-from common.models import Estate
+from common.models import Estate, HouseInfo
 
 
 class CustomPagePagination(PageNumberPagination):
@@ -27,3 +28,22 @@ class EstateFilterSet(filterset.FilterSet):
     class Meta:
         model = Estate
         fields = ('name', 'minhot', 'maxhot', 'dist')
+
+
+class HouseInfoFilterSet(filterset.FilterSet):
+    """自定义房源筛选器"""
+    title = filterset.CharFilter(lookup_expr='contains')
+    minprice = filterset.NumberFilter(field_name='price', lookup_expr='gte')
+    maxprice = filterset.NumberFilter(field_name='price', lookup_expr='lte')
+    minarea = filterset.NumberFilter(field_name='area', lookup_expr='gte')
+    maxarea = filterset.NumberFilter(field_name='area', lookup_expr='lte')
+    district = filterset.NumberFilter(method='filter_by_district')
+
+    @staticmethod
+    def filter_by_district(queryset, name, value):
+        return queryset.filter(Q(district_level2=value) |
+                               Q(district_level3=value))
+
+    class Meta:
+        model = HouseInfo
+        fields = ('title', 'minprice', 'maxprice', 'minarea', 'maxarea', 'type', 'district')

@@ -10,6 +10,14 @@ from django.db import models
 #     update_time = models.DateTimeField(auto_now=True)
 #     deleted = models.BooleanField(default=False)
 #
+#     def __str__(self):
+#         value = getattr(self, 'name', None)
+#         if not value:
+#             key1 = f'{str(self.__class__).lower()}name'
+#             key2 = f'{str(self.__class__).lower()}id'
+#             value = getattr(self, key1, None) or getattr(self, key2, None)
+#         return value or super().__str__()
+#
 #     class Meta:
 #         abstract = True
 
@@ -166,7 +174,6 @@ class HouseInfo(models.Model):
     type = models.ForeignKey(to=HouseType, on_delete=models.DO_NOTHING, db_column='typeid')
     # 房源发布者
     user = models.ForeignKey(to=User, on_delete=models.DO_NOTHING, db_column='userid')
-    # 给ForeignKey加上related_name='+'可以避免多对一关系从一的一方向多的一方发起查询
     # 房源所属二级行政区域
     district_level2 = models.ForeignKey(to=District, on_delete=models.DO_NOTHING, related_name='+', db_column='distid2')
     # 房源所属三级行政区域

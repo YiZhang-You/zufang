@@ -3,7 +3,7 @@ import json
 from django_redis import get_redis_connection
 from rest_framework import serializers
 
-from common.models import District, Agent, Estate, HouseType
+from common.models import District, Agent, Estate, HouseType, Tag, HouseInfo, HousePhoto
 
 
 class DistrictSimpleSerializer(serializers.ModelSerializer):
@@ -73,7 +73,16 @@ class EstateSimpleSerializer(serializers.ModelSerializer):
         fields = ('estateid', 'name')
 
 
+class EstateCreateSerializer(serializers.ModelSerializer):
+    """创建楼盘序列化器"""
+
+    class Meta:
+        model = Estate
+        fields = '__all__'
+
+
 class EstateDetailSerializer(serializers.ModelSerializer):
+    """楼盘详情序列化器"""
     district = serializers.SerializerMethodField()
 
     @staticmethod
@@ -91,3 +100,95 @@ class HouseTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = HouseType
         fields = '__all__'
+
+
+class TagSerializer(serializers.ModelSerializer):
+    """房源标签序列化器"""
+
+    class Meta:
+        model = Tag
+        fields = '__all__'
+
+
+class HouseInfoSimpleSerializer(serializers.ModelSerializer):
+    """房源基本信息序列化器"""
+    mainphoto = serializers.SerializerMethodField()
+    district = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_mainphoto(houseinfo):
+        return '/media/images/' + houseinfo.mainphoto
+
+    @staticmethod
+    def get_district(houseinfo):
+        return DistrictSimpleSerializer(houseinfo.district_level3).data
+
+    @staticmethod
+    def get_type(houseinfo):
+        return HouseTypeSerializer(houseinfo.type).data
+
+    @staticmethod
+    def get_tags(houseinfo):
+        return TagSerializer(houseinfo.tags, many=True).data
+
+    class Meta:
+        model = HouseInfo
+        fields = ('houseid', 'title', 'area', 'floor', 'totalfloor', 'price', 'priceunit',
+                  'mainphoto', 'street', 'district', 'type', 'tags')
+
+
+class HouseInfoCreateSerializer(serializers.ModelSerializer):
+    """创建房源序列化器"""
+
+    class Meta:
+        model = HouseInfo
+        fields = '__all__'
+
+
+class HouseInfoDetailSerializer(serializers.ModelSerializer):
+    """房源详情序列化器"""
+    district = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    tags = serializers.SerializerMethodField()
+    estate = serializers.SerializerMethodField()
+    agent = serializers.SerializerMethodField()
+    photos = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_district(houseinfo):
+        return DistrictSimpleSerializer(houseinfo.district_level3).data
+
+    @staticmethod
+    def get_type(houseinfo):
+        return HouseTypeSerializer(houseinfo.type).data
+
+    @staticmethod
+    def get_tags(houseinfo):
+        return TagSerializer(houseinfo.tags, many=True).data
+
+    @staticmethod
+    def get_estate(houseinfo):
+        return EstateSimpleSerializer(houseinfo.estate).data
+
+    @staticmethod
+    def get_agent(houseinfo):
+        return AgentSimpleSerializer(houseinfo.agent).data
+
+    @staticmethod
+    def get_photos(houseinfo):
+        queryset = HousePhoto.objects.filter(house=houseinfo)
+        return HousePhotoSerializer(queryset, many=True).data
+
+    class Meta:
+        model = HouseInfo
+        exclude = ('district_level2', 'district_level3', 'user')
+
+
+class HousePhotoSerializer(serializers.ModelSerializer):
+    """房源照片序列化器"""
+
+    class Meta:
+        model = HousePhoto
+        fields = ('photoid', 'path')
