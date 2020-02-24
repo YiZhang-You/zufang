@@ -56,7 +56,7 @@ def get_district(request, distid):
 @method_decorator(decorator=cache_page(timeout=86400), name='get')
 class HotCityView(ListAPIView):
     """热门城市视图"""
-    queryset = District.objects.filter(ishot=True).only('distid', 'name')
+    queryset = District.objects.filter(ishot=True).only('name')
     serializer_class = DistrictSimpleSerializer
     pagination_class = None
 
