@@ -3,13 +3,13 @@
     <head>
         <meta charset="utf-8" >
         <title>租房网 - 用户登录</title>
-        <link rel="stylesheet" href="../css/style.css">
-        <link rel="stylesheet" href="../css/head.css">
+        <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/head.css">
     </head>
     <body>
         <div id="header" class="wrap">
 			<div id="logo">
-				<img src="../images/logo.png" width="160" height="40">
+				<img src="/static/images/logo.png" width="160" height="40">
 			</div>
 			<div id="headbar">
 				<a href="login.html">用户登录</a>
@@ -44,7 +44,7 @@
                                     <td class="field"><label for="captcha">验 证 码：</label></td>
                                     <td>
                                         <input id="captcha" type="text" class="text" name="captcha">
-                                        <img id="captchaImage" src="" width="80" height="30">
+                                        <img id="captchaImage" src="/captcha/" width="80" height="30">
                                     </td>
                                 </tr>
                             </table>
@@ -64,8 +64,14 @@
 				<dd>关于千锋 · 联系我们 · 意见反馈 · 帮助中心</dd>
             </dl>
         </div>
-        <script src="../js/jquery.min.js"></script>
-        <script></script>
+        <script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+        <script>
+            $(() => {
+                $('#captchaImage').on('click', (evt) => {
+                    $(evt.target).attr('src', '/captcha/?' + Math.random())
+                })
+            })
+        </script>
     </body>
 </html>
 

@@ -2,7 +2,7 @@ import datetime
 
 import jwt
 from django.core.cache import caches
-from django.db.models import Prefetch
+from django.db.models import Prefetch, Q
 from django.db.transaction import atomic
 from django.utils import timezone
 from django.utils.decorators import method_decorator
@@ -46,7 +46,11 @@ def login(request):
     password = request.data.get('password')
     if username and password:
         password = to_md5_hex(password)
-        user = User.objects.filter(username=username, password=password).first()
+        user = User.objects.filter(
+            Q(username=username, password=password) |
+            Q(tel=username, password=password) |
+            Q(email=username, password=password)
+        ).first()
         if user:
             # 用户登录成功通过JWT生成用户身份令牌
             payload = {
@@ -66,7 +70,7 @@ def login(request):
                 loginlog.logdate = current_time
                 loginlog.ipaddr = get_ip_address(request)
                 loginlog.save()
-            resp = DefaultResponse(*USER_LOGIN_SUCCESS)
+            resp = DefaultResponse(*USER_LOGIN_SUCCESS, data={'token': token})
         else:
             resp = DefaultResponse(*USER_LOGIN_FAILED)
     else:
