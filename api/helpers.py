@@ -1,8 +1,28 @@
 from django.db.models import Q
 from rest_framework.pagination import PageNumberPagination, CursorPagination
 from django_filters import filterset
+from rest_framework.response import Response
 
+from api.consts import TEL_PATTERN
 from common.models import Estate, HouseInfo
+
+
+def check_tel(tel):
+    """检查手机号是否合法"""
+    return TEL_PATTERN.fullmatch(tel) is not None
+
+
+class DefaultResponse(Response):
+    """定义返回JSON数据的响应类"""
+
+    def __init__(self, code=100000, message='操作成功',
+                 data=None, status=None, template_name=None,
+                 headers=None, exception=False, content_type=None):
+        _data = {'code': code, 'message': message}
+        if data:
+            _data.update(data)
+        super().__init__(_data, status, template_name,
+                         headers, exception, content_type)
 
 
 class CustomPagePagination(PageNumberPagination):

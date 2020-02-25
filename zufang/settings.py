@@ -37,11 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'debug_toolbar',
-    'rest_framework',
-    'django_filters',
+    # 'debug_toolbar',
+    # 'rest_framework',
+    # 'rest_framework_swagger',
+    # 'django_filters',
     'common',
-    'api',
 ]
 
 MIDDLEWARE = [
@@ -214,8 +214,8 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
 
-# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-# MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/'
 
 # FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 

@@ -46,6 +46,7 @@ class User(models.Model):
     lastvisit = models.DateTimeField(blank=True, null=True)
     # 用户角色
     roles = models.ManyToManyField(to='Role', through='UserRole')
+    # role = models.OneToOneField(to='Role', on_delete=models.DO_NOTHING)
 
     class Meta:
         managed = False

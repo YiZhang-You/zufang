@@ -1,4 +1,10 @@
+import datetime
+
+import jwt
+from django.core.cache import caches
 from django.db.models import Prefetch
+from django.db.transaction import atomic
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
@@ -8,9 +14,64 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.helpers import EstateFilterSet, HouseInfoFilterSet
+from api.consts import *
+from api.helpers import EstateFilterSet, HouseInfoFilterSet, check_tel, DefaultResponse
 from api.serializers import *
-from common.models import District, Agent, HouseType, Tag
+from common.models import District, Agent, HouseType, Tag, User, LoginLog
+from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, get_ip_address
+from zufang.settings import SECRET_KEY
+
+
+@api_view(('GET', ))
+def get_code_by_sms(request, tel):
+    """获取短信验证码"""
+    if check_tel(tel):
+        if caches['default'].get(tel):
+            resp = DefaultResponse(*CODE_TOO_FREQUENCY)
+        else:
+            code = gen_mobile_code()
+            message = f'您的短信验证码是{code}，打死也不能告诉别人哟！【Python小课】'
+            send_sms_by_luosimao(tel, message=message)
+            caches['default'].set(tel, code, timeout=120)
+            resp = DefaultResponse(*MOBILE_CODE_SUCCESS)
+    else:
+        resp = DefaultResponse(*INVALID_TEL_NUM)
+    return resp
+
+
+@api_view(('POST', ))
+def login(request):
+    """登录（获取用户身份令牌）"""
+    username = request.data.get('username')
+    password = request.data.get('password')
+    if username and password:
+        password = to_md5_hex(password)
+        user = User.objects.filter(username=username, password=password).first()
+        if user:
+            # 用户登录成功通过JWT生成用户身份令牌
+            payload = {
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
+                'data': {'userid': user.userid, }
+            }
+            token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode()
+            with atomic():
+                current_time = timezone.now()
+                if not user.lastvisit or \
+                        (current_time - user.lastvisit).days >= 1:
+                    user.point += 2
+                    user.lastvisit = current_time
+                    user.save()
+                loginlog = LoginLog()
+                loginlog.user = user
+                loginlog.logdate = current_time
+                loginlog.ipaddr = get_ip_address(request)
+                loginlog.save()
+            resp = DefaultResponse(*USER_LOGIN_SUCCESS)
+        else:
+            resp = DefaultResponse(*USER_LOGIN_FAILED)
+    else:
+        resp = DefaultResponse(*INVALID_LOGIN_INFO)
+    return resp
 
 
 @cache_page(timeout=365 * 86400)
@@ -44,18 +105,21 @@ def get_district(request, distid):
     redis_cli = get_redis_connection()
     data = redis_cli.get(f'zufang:district:{distid}')
     if data:
-        data = json.loads(data)
+        data = ujson.loads(data)
     else:
         district = District.objects.filter(distid=distid)\
             .defer('parent').first()
         data = DistrictDetailSerializer(district).data
-        redis_cli.set(f'zufang:district:{distid}', json.dumps(data), ex=900)
+        redis_cli.set(f'zufang:district:{distid}', ujson.dumps(data), ex=900)
     return Response(data)
 
 
 @method_decorator(decorator=cache_page(timeout=86400), name='get')
 class HotCityView(ListAPIView):
-    """热门城市视图"""
+    """热门城市视图
+    get:
+        获取热门城市
+    """
     queryset = District.objects.filter(ishot=True).only('name')
     serializer_class = DistrictSimpleSerializer
     pagination_class = None
@@ -64,7 +128,20 @@ class HotCityView(ListAPIView):
 @method_decorator(decorator=cache_page(timeout=120), name='list')
 @method_decorator(decorator=cache_page(timeout=300), name='retrieve')
 class AgentViewSet(ModelViewSet):
-    """经理人视图"""
+    """经理人视图
+    list:
+        获取经理人列表
+    retrieve:
+        获取经理人详情
+    create:
+        创建经理人
+    update:
+        更新经理人信息
+    partial_update:
+        更新经理人信息
+    delete:
+        删除经理人
+    """
     queryset = Agent.objects.all()
 
     def get_queryset(self):

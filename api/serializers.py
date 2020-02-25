@@ -1,7 +1,8 @@
-import json
+import ujson
 
 from django_redis import get_redis_connection
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from common.models import District, Agent, Estate, HouseType, Tag, HouseInfo, HousePhoto
 
@@ -23,11 +24,12 @@ class DistrictDetailSerializer(serializers.ModelSerializer):
         redis_cli = get_redis_connection()
         data = redis_cli.get(f'zufang:district:{district.distid}:cities')
         if data:
-            data = json.loads(data)
+            data = ujson.loads(data)
         else:
             queryset = District.objects.filter(parent=district).only('name')
             data = DistrictSimpleSerializer(queryset, many=True).data
-            redis_cli.set(f'zufang:district:{district.distid}:cities', json.dumps(data), ex=900)
+            redis_cli.set(f'zufang:district:{district.distid}:cities',
+                          ujson.dumps(data), ex=900)
         return data
 
     class Meta:
@@ -83,11 +85,7 @@ class EstateCreateSerializer(serializers.ModelSerializer):
 
 class EstateDetailSerializer(serializers.ModelSerializer):
     """楼盘详情序列化器"""
-    district = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_district(estate):
-        return DistrictSimpleSerializer(estate.district).data
+    district = DistrictSimpleSerializer()
 
     class Meta:
         model = Estate
@@ -114,8 +112,8 @@ class HouseInfoSimpleSerializer(serializers.ModelSerializer):
     """房源基本信息序列化器"""
     mainphoto = serializers.SerializerMethodField()
     district = serializers.SerializerMethodField()
-    type = serializers.SerializerMethodField()
-    tags = serializers.SerializerMethodField()
+    type = HouseTypeSerializer()
+    tags = TagSerializer(many=True)
 
     @staticmethod
     def get_mainphoto(houseinfo):
@@ -125,18 +123,11 @@ class HouseInfoSimpleSerializer(serializers.ModelSerializer):
     def get_district(houseinfo):
         return DistrictSimpleSerializer(houseinfo.district_level3).data
 
-    @staticmethod
-    def get_type(houseinfo):
-        return HouseTypeSerializer(houseinfo.type).data
-
-    @staticmethod
-    def get_tags(houseinfo):
-        return TagSerializer(houseinfo.tags, many=True).data
-
     class Meta:
         model = HouseInfo
-        fields = ('houseid', 'title', 'area', 'floor', 'totalfloor', 'price', 'priceunit',
-                  'mainphoto', 'street', 'district', 'type', 'tags')
+        fields = ('houseid', 'title', 'area', 'floor', 'totalfloor',
+                  'price', 'priceunit', 'mainphoto', 'street',
+                  'district', 'type', 'tags')
 
 
 class HouseInfoCreateSerializer(serializers.ModelSerializer):
@@ -149,37 +140,21 @@ class HouseInfoCreateSerializer(serializers.ModelSerializer):
 
 class HouseInfoDetailSerializer(serializers.ModelSerializer):
     """房源详情序列化器"""
-    district = serializers.SerializerMethodField()
-    type = serializers.SerializerMethodField()
-    tags = serializers.SerializerMethodField()
-    estate = serializers.SerializerMethodField()
-    agent = serializers.SerializerMethodField()
     photos = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_district(houseinfo):
-        return DistrictSimpleSerializer(houseinfo.district_level3).data
-
-    @staticmethod
-    def get_type(houseinfo):
-        return HouseTypeSerializer(houseinfo.type).data
-
-    @staticmethod
-    def get_tags(houseinfo):
-        return TagSerializer(houseinfo.tags, many=True).data
-
-    @staticmethod
-    def get_estate(houseinfo):
-        return EstateSimpleSerializer(houseinfo.estate).data
-
-    @staticmethod
-    def get_agent(houseinfo):
-        return AgentSimpleSerializer(houseinfo.agent).data
+    district = serializers.SerializerMethodField()
+    type = HouseTypeSerializer()
+    agent = AgentSimpleSerializer()
+    estate = EstateSimpleSerializer()
+    tags = TagSerializer(many=True)
 
     @staticmethod
     def get_photos(houseinfo):
         queryset = HousePhoto.objects.filter(house=houseinfo)
         return HousePhotoSerializer(queryset, many=True).data
+
+    @staticmethod
+    def get_district(houseinfo):
+        return DistrictSimpleSerializer(houseinfo.district_level3).data
 
     class Meta:
         model = HouseInfo

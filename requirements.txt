@@ -5,6 +5,7 @@ django-filter
 django-cors-headers
 django-imagekit
 django-debug-toolbar
+django-rest-swagger
 PyJWT
 qiniu
 qrcode
@@ -17,3 +18,5 @@ itsdangerous
 elasticsearch
 PyMySQL
 pillow
+boto3
+ujson

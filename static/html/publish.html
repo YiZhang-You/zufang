@@ -3,13 +3,13 @@
 	<head>
 		<meta charset="utf-8" />
 		<title>租房网 - 发布房屋信息</title>
-		<link rel="stylesheet" href="../css/style.css">
-        <link rel="stylesheet" href="../css/head.css">
+		<link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/head.css">
 	</head>
 	<body>
 		<div id="header" class="wrap">
 			<div id="logo">
-				<img src="../images/logo.png" width="160" height="40">
+				<img src="/static/images/logo.png" width="160" height="40">
 			</div>
 			<div id="headbar">
 				<a href="login.html">用户登录</a>
@@ -101,13 +101,15 @@
 								<tr>
 									<td class="field">上传图片：</td>
 									<td>
-										<input id="file" type="file" class="text" name="mainphoto" multiple>
+										<input id="file" type="file" class="text" name="mainphoto">
 										<input id="addbutton" type="button" value="+" class="addbutton">
 									</td>
 								</tr>
 								<tr>
 									<td class="field">图片预览：</td>
-									<td id="prevArea"><img id="housePhoto" src="" alt="" width="160" height="120"></td>
+									<td id="prevArea">
+										<img id="housePhoto" src="/static/images/upload_photo.png" alt="请选择图片" width="160" height="120">
+									</td>
 								</tr>
 		                        <tr>
 									<td class="field">详细信息：</td>
@@ -127,36 +129,32 @@
 				<dd>关于千锋 · 联系我们 · 意见反馈 · 帮助中心</dd>
 			</dl>
 		</div>
-		<script src="../js/jquery.min.js"></script>
+		<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
 		<script type="text/javascript">
 			$(function() {
 				$('#addbutton').on('click', function() {
 					var tr = $(this).parent().parent()
-					var img = $('<img>').attr('width', 160).attr('height', 120)
+					var img = $('<img src="/static/images/upload_photo.png">').attr('width', 160).attr('height', 120)
 					$('#prevArea').append(img)
-					var newTr = $('<tr>')
-					var newTd1 = $('<td class="field"></td>')
-					var newTd2 = $('<td>')
+					var newRow = $('<tr>')
+					var newCol1 = $('<td class="field"></td>')
+					var newCol2 = $('<td>')
 					var fileInput = $('<input type="file" name="photo" class="text"/>')
-					fileInput.on('change', function() {
-						doPreview(this, img)
+					fileInput.on('change', (evt) => {
+						doPreview(evt.target, img)
 					})
 					var minusButton = $('<input type="button" value="-" class="minusbutton"/>')
-					minusButton.on('click', function() {
-						newTr.remove()
+					minusButton.on('click', (evt) => {
+						newRow.remove()
 						img.remove()
 					})
-					newTd2.append(fileInput)
-					newTd2.append(minusButton)
-					newTr.append(newTd1)
-					newTr.append(newTd2)
-					tr.after(newTr)
+					newCol2.append(fileInput).append(minusButton)
+					tr.after(newRow.append(newCol1).append(newCol2))
 				})
 				
-				$('#file').on('change', function() {
-					doPreview(this, $('#housePhoto'))
+				$('#file').on('change', (evt) => {
+					doPreview(evt.target, $('#housePhoto'))
 				})
-			
 			})
 			
 			function doPreview(source, target) {
