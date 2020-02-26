@@ -15,7 +15,7 @@ import requests
 from PIL.Image import Image
 
 from common.consts import *
-from zufang.settings import BASE_DIR
+from zufang import app
 
 
 def get_ip_address(request):
@@ -65,6 +65,7 @@ def gen_qrcode(data):
     return buffer.getvalue()
 
 
+@app.task
 def send_sms_by_luosimao(tel, message):
     """发送短信（调用螺丝帽短信网关）"""
     resp = requests.post(
@@ -79,12 +80,14 @@ def send_sms_by_luosimao(tel, message):
     return ujson.loads(resp.content)
 
 
+@app.task
 def upload_file_to_qiniu(file_path, filename):
     """将文件上传到七牛云存储"""
     token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
     return qiniu.put_file(token, filename, file_path)
 
 
+@app.task
 def upload_stream_to_qiniu(file_stream, filename, size):
     """将数据流上传到七牛云存储"""
     token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)

@@ -37,13 +37,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'debug_toolbar',
-    # 'rest_framework',
-    # 'rest_framework_swagger',
-    # 'django_filters',
+    'debug_toolbar',
+    'rest_framework',
+    'rest_framework_swagger',
+    'django_filters',
     'common',
 ]
 
+# Django中的中间件（拦截过滤器）
 MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.security.SecurityMiddleware',
