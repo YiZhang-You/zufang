@@ -7,7 +7,7 @@ from zufang import settings
 
 pymysql.install_as_MySQLdb()
 
-# 加载环境
+# 加载Django项目配置
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'zufang.settings')
 
 # 创建Celery对象，指定模块名、消息代理（消息队列）和持久化方式
