@@ -5,12 +5,12 @@ import qiniu
 
 MAX_READ_SIZE = 64 * 1024
 
-# QINIU_ACCESS_KEY = 'access_key'
-# QINIU_SECRET_KEY = 'secret_key'
-# QINIU_BUCKET_NAME = 'bucket_name'
-#
-# AUTH = qiniu.Auth(QINIU_ACCESS_KEY, QINIU_SECRET_KEY)
-#
+QINIU_ACCESS_KEY = 'KarvlHfUdoG1mZNSfDVS5Vh3nae2jUZumTBHK-PR'
+QINIU_SECRET_KEY = 'SFPFkAn5NENhdCMqMe9wd_lxGHAeFR5caXxPTtt7'
+QINIU_BUCKET_NAME = 'zufangwang'
+
+AUTH = qiniu.Auth(QINIU_ACCESS_KEY, QINIU_SECRET_KEY)
+
 # AWS3_REGION = 'region_name'
 # AWS3_AK = 'access_key'
 # AWS3_SK = 'secret_key'

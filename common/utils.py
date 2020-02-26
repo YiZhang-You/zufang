@@ -14,7 +14,8 @@ import qrcode
 import requests
 from PIL.Image import Image
 
-from common.consts import EXECUTOR
+from common.consts import *
+from zufang.settings import BASE_DIR
 
 
 def get_ip_address(request):
@@ -78,18 +79,18 @@ def send_sms_by_luosimao(tel, message):
     return ujson.loads(resp.content)
 
 
-# def upload_filepath_to_qiniu(file_path, filename):
-#     """将文件上传到七牛云存储"""
-#     token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
-#     return qiniu.put_file(token, filename, file_path)
-#
-#
-# def upload_stream_to_qiniu(file_stream, filename, size):
-#     """将数据流上传到七牛云存储"""
-#     token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
-#     return qiniu.put_stream(token, filename, file_stream, None, size)
-#
-#
+def upload_file_to_qiniu(file_path, filename):
+    """将文件上传到七牛云存储"""
+    token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
+    return qiniu.put_file(token, filename, file_path)
+
+
+def upload_stream_to_qiniu(file_stream, filename, size):
+    """将数据流上传到七牛云存储"""
+    token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
+    return qiniu.put_stream(token, filename, file_stream, None, size)
+
+
 # def url_from_key(file_key):
 #     """通过文件的key拼接访问URL"""
 #     return f'https://s3.{AWS3_REGION}.amazonaws.com.cn/{AWS3_BUCKET}/{file_key}'
