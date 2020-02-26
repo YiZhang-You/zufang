@@ -34,7 +34,7 @@ def get_code_by_sms(request, tel):
             # 通过异步化函数的delay方法让函数异步化的执行，这个地方就相当于是消息的生产者
             # 如果要完成这个任务还需要消息的消费者，需要其他的进程来处理掉这条消息
             # 消费者跟生产者可以是不同的机器（通常情况下也是如此）
-            # celery -A
+            # celery -A zufang worker -l debug
             send_sms_by_luosimao.delay(tel, message=message)
             caches['default'].set(tel, code, timeout=120)
             resp = DefaultResponse(*MOBILE_CODE_SUCCESS)
