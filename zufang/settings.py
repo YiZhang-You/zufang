@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'django_filters',
     'common',
+    'django_celery_results',
 ]
 
 # Django中的中间件（拦截过滤器）
@@ -75,7 +76,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'zufang.wsgi.application'
-
 
 # djangorestframework的配置
 REST_FRAMEWORK = {

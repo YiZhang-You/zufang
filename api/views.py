@@ -35,7 +35,18 @@ def get_code_by_sms(request, tel):
             # 如果要完成这个任务还需要消息的消费者，需要其他的进程来处理掉这条消息
             # 消费者跟生产者可以是不同的机器（通常情况下也是如此）
             # celery -A zufang worker -l debug
-            send_sms_by_luosimao.delay(tel, message=message)
+            # send_sms_by_luosimao.delay(tel, message)
+            # task = send_sms_by_luosimao.s(countdown=10, expires=60)
+            # task.delay(tel, message)
+            send_sms_by_luosimao.apply_async(
+                (tel, message),
+                # {'tel': tel, 'message': message},
+                queue='queue1',
+                countdown=10,
+                # retry_policy={},
+                # expires=60,
+                # compression='zlib',
+            )
             caches['default'].set(tel, code, timeout=120)
             resp = DefaultResponse(*MOBILE_CODE_SUCCESS)
     else:

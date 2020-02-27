@@ -141,14 +141,13 @@ def run_in_thread_pool(*, callbacks=(), callbacks_kwargs=()):
         @wraps(func)
         def wrapper(*args, **kwargs):
             future = EXECUTOR.submit(func, *args, **kwargs)
-            if callbacks:
-                for index, callback in enumerate(callbacks):
-                    try:
-                        kwargs = callbacks_kwargs[index]
-                    except IndexError:
-                        kwargs = None
-                    fn = partial(callback, **kwargs) if kwargs else callback
-                    future.add_done_callback(fn)
+            for index, callback in enumerate(callbacks):
+                try:
+                    kwargs = callbacks_kwargs[index]
+                except IndexError:
+                    kwargs = None
+                fn = partial(callback, **kwargs) if kwargs else callback
+                future.add_done_callback(fn)
             return future
 
         return wrapper

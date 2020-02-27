@@ -19,5 +19,6 @@ AUTH = qiniu.Auth(QINIU_ACCESS_KEY, QINIU_SECRET_KEY)
 # S3 = boto3.client('s3', region_name=AWS3_REGION,
 #                   aws_access_key_id=AWS3_AK, aws_secret_access_key=AWS3_SK)
 
-MAX_THREAD_WORKERS = 16
+# sysbench ---> 测试整机性能的工具
+MAX_THREAD_WORKERS = 64
 EXECUTOR = ThreadPoolExecutor(max_workers=MAX_THREAD_WORKERS)
