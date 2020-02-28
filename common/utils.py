@@ -26,8 +26,13 @@ def get_ip_address(request):
 
 def to_md5_hex(data):
     """生成MD5摘要"""
-    if type(data) == str:
-        data = data.encode()
+    if type(data) != bytes:
+        if type(data) == str:
+            data = data.encode()
+        elif type(data) == io.BytesIO:
+            data = data.getvalue()
+        else:
+            data = bytes(data)
     return hashlib.md5(data).hexdigest()
 
 

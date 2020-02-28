@@ -39,8 +39,8 @@ from zufang.settings import SECRET_KEY
 @api_view(('POST', ))
 def upload_house_photo(request):
     file_obj = request.FILES.get('mainphoto')
-    if len(file_obj) < MAX_PHOTO_SIZE:
-        prefix = to_md5_hex(file_obj.file.getvalue())
+    if file_obj and len(file_obj) < MAX_PHOTO_SIZE:
+        prefix = to_md5_hex(file_obj.file)
         filename = f'{prefix}{os.path.splitext(file_obj.name)[1]}'
         upload_stream_to_qiniu.delay(file_obj, filename, len(file_obj))
         photo = HousePhoto()

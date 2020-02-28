@@ -161,21 +161,25 @@
 			})
 
 			function doUpload(fileInput) {
-				let formData = new FormData()
-				formData.append(fileInput.name, fileInput.files[0])
-				fetch('/api/photos/', {
-					method: 'POST',
-					body: formData
-				})
-					.then(resp => resp.json())
-					.then(json => {
-						if (json.code == 300001) {
-							photoIds.push(json.photoid)
-							fetchPhoto(json.url)
-						} else {
-							alert(json.message)
-						}
+				if (fileInput.files[0]) {
+					let formData = new FormData()
+					formData.append(fileInput.name, fileInput.files[0])
+					fetch('/api/photos/', {
+						method: 'POST',
+						body: formData
 					})
+						.then(resp => resp.json())
+						.then(json => {
+							if (json.code == 300001) {
+								photoIds.push(json.photoid)
+								fetchPhoto(json.url)
+							} else {
+								alert(json.message)
+							}
+						})
+				} else {
+					$('#housePhoto').attr('src', '/static/images/upload_photo.png')
+				}
 			}
 
 			function fetchPhoto(url) {
@@ -186,7 +190,7 @@
 					if (resp.status == 200) {
 						$('#housePhoto').attr('src', url)
 					} else {
-						timerId = setTimeout(() => { fetchPhoto(url) }, 2000)
+						timerId = setTimeout(() => { fetchPhoto(url) }, 3000)
 					}
 				})
 			}
