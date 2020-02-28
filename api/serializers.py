@@ -214,7 +214,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         del validated_data['code']
-        # del caches['default'][f'{validated_data["tel"]}:valid']
+        caches['default'].delete(f'{validated_data["tel"]}:valid')
         validated_data['password'] = to_md5_hex(validated_data['password'])
         with atomic():
             user = User.objects.create(**validated_data)
