@@ -21,7 +21,7 @@ from rest_framework.viewsets import ModelViewSet
 from api.consts import MAX_PHOTO_SIZE, FILE_UPLOAD_SUCCESS, FILE_SIZE_EXCEEDED, \
     CODE_TOO_FREQUENCY, MOBILE_CODE_SUCCESS, INVALID_TEL_NUM, USER_LOGIN_SUCCESS, \
     USER_LOGIN_FAILED, INVALID_LOGIN_INFO
-from api.helpers import EstateFilterSet, HouseInfoFilterSet, DefaultResponse
+from api.helpers import EstateFilterSet, HouseInfoFilterSet, DefaultResponse, LoginRequiredAuthentication
 from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, \
     AgentCreateSerializer, AgentDetailSerializer, AgentSimpleSerializer, \
     HouseTypeSerializer, TagSerializer, EstateCreateSerializer, \
@@ -32,7 +32,7 @@ from common.models import District, Agent, HouseType, Tag, User, LoginLog, \
     HousePhoto, Estate, HouseInfo, Role
 from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, \
     get_ip_address, upload_stream_to_qiniu
-from common.validators import check_tel
+from common.validators import check_tel, check_username, check_email
 from zufang.settings import SECRET_KEY
 
 
@@ -80,12 +80,14 @@ def login(request):
     """登录（获取用户身份令牌）"""
     username = request.data.get('username')
     password = request.data.get('password')
-    if username and password:
+    if (check_username(username) or check_tel(username) or
+            check_email(username)) and len(password) >= 6:
         password = to_md5_hex(password)
         q = Q(username=username, password=password) | \
             Q(tel=username, password=password) | \
             Q(email=username, password=password)
-        user = User.objects.filter(q).only('realname')\
+        user = User.objects.filter(q)\
+            .only('username', 'realname', 'roles')\
             .prefetch_related(
                 Prefetch('roles', queryset=Role.objects.all().only('roleid'))
             ).first()
@@ -94,7 +96,10 @@ def login(request):
             # 用户登录成功通过JWT生成用户身份令牌
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
-                'data': {'userid': user.userid, 'realname': user.realname, 'roles': roles}
+                'data': {
+                    'userid': user.userid,
+                    'roles': roles
+                }
             }
             token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode()
             with atomic():
@@ -109,7 +114,9 @@ def login(request):
                 loginlog.logdate = current_time
                 loginlog.ipaddr = get_ip_address(request)
                 loginlog.save()
-            resp = DefaultResponse(*USER_LOGIN_SUCCESS, data={'token': token})
+            resp = DefaultResponse(*USER_LOGIN_SUCCESS, data={
+                'token': token, 'username': user.username, 'realname': user.realname
+            })
         else:
             resp = DefaultResponse(*USER_LOGIN_FAILED)
     else:
@@ -230,6 +237,7 @@ class EstateViewSet(ModelViewSet):
     filterset_class = EstateFilterSet
     ordering = '-hot'
     ordering_fields = ('district', 'hot', 'name')
+    authentication_classes = (LoginRequiredAuthentication, )
 
     def get_queryset(self):
         if self.action == 'list':

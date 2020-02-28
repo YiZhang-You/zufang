@@ -1,9 +1,14 @@
+import jwt
 from django.db.models import Q
+from jwt import DecodeError
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.pagination import PageNumberPagination, CursorPagination
 from django_filters import filterset
 from rest_framework.response import Response
 
 from common.models import Estate, HouseInfo
+from zufang.settings import SECRET_KEY
 
 
 class DefaultResponse(Response):
@@ -17,6 +22,22 @@ class DefaultResponse(Response):
             _data.update(data)
         super().__init__(_data, status, template_name,
                          headers, exception, content_type)
+
+
+class LoginRequiredAuthentication(BaseAuthentication):
+    """登录认证"""
+
+    # 如果用户身份验证成功需要返回一个二元组(user, token)
+    def authenticate(self, request):
+        token = request.META.get('HTTP_TOKEN')
+        if token:
+            try:
+                payload = jwt.decode(token, SECRET_KEY)
+                user = payload['data']
+                return user, token
+            except DecodeError:
+                pass
+        raise AuthenticationFailed('请提供有效的身份标识')
 
 
 class CustomPagePagination(PageNumberPagination):

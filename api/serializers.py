@@ -195,25 +195,26 @@ class UserCreateSerializer(serializers.ModelSerializer):
     """创建用户序列化器"""
     username = serializers.RegexField(regex=USERNAME_PATTERN)
     password = serializers.CharField(min_length=6)
+    realname = serializers.RegexField(regex=r'[\u4e00-\u9fa5]{2,20}')
     tel = serializers.RegexField(regex=TEL_PATTERN)
     email = serializers.RegexField(regex=EMAIL_PATTERN)
     code = serializers.CharField(write_only=True, min_length=6, max_length=6)
 
-    @staticmethod
-    def validate(attrs):
+    def validate(self, attrs):
         code_from_user = attrs['code']
         code_from_redis = caches['default'].get(f'{attrs["tel"]}:valid')
         if code_from_redis != code_from_user:
-            raise ValidationError('请输入有效的手机验证码')
+            raise ValidationError('请输入有效的手机验证码', 'invalid')
         user = User.objects.filter(Q(username=attrs['username']) |
                                    Q(tel=attrs['tel']) |
                                    Q(email=attrs['email']))
         if user:
-            raise ValidationError('用户名、手机或邮箱已被注册')
+            raise ValidationError('用户名、手机或邮箱已被注册', 'invalid')
         return attrs
 
     def create(self, validated_data):
         del validated_data['code']
+        # del caches['default'][f'{validated_data["tel"]}:valid']
         validated_data['password'] = to_md5_hex(validated_data['password'])
         with atomic():
             user = User.objects.create(**validated_data)

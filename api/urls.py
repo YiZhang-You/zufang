@@ -8,8 +8,8 @@ from api.views import get_provinces, get_district, HotCityView, \
 
 urlpatterns = [
     path('photos/', upload_house_photo),
-    path('token/', login),
-    path('token/<str:token>', logout),
+    path('tokens/', login),
+    path('tokens/<str:token>/', logout),
     path('mobile/<str:tel>/', get_code_by_sms),
     path('districts/', get_provinces),
     path('districts/<int:distid>/', get_district),
