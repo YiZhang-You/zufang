@@ -131,6 +131,8 @@
 		</div>
 		<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
 		<script type="text/javascript">
+			let photoIds = []
+			let timerId = 0
 			$(function() {
 				$('#addbutton').on('click', function() {
 					var tr = $(this).parent().parent()
@@ -153,17 +155,49 @@
 				})
 				
 				$('#file').on('change', (evt) => {
-					doPreview(evt.target, $('#housePhoto'))
+					// doPreview(evt.target)
+					doUpload(evt.target)
 				})
 			})
+
+			function doUpload(fileInput) {
+				let formData = new FormData()
+				formData.append(fileInput.name, fileInput.files[0])
+				fetch('/api/photos/', {
+					method: 'POST',
+					body: formData
+				})
+					.then(resp => resp.json())
+					.then(json => {
+						if (json.code == 300001) {
+							photoIds.push(json.photoid)
+							fetchPhoto(json.url)
+						} else {
+							alert(json.message)
+						}
+					})
+			}
+
+			function fetchPhoto(url) {
+				if (timerId) {
+					clearTimeout(timerId)
+				}
+				fetch(url).then(resp => {
+					if (resp.status == 200) {
+						$('#housePhoto').attr('src', url)
+					} else {
+						timerId = setTimeout(() => { fetchPhoto(url) }, 2000)
+					}
+				})
+			}
 			
-			function doPreview(source, target) {
-				var file = source.files[0]
+			function doPreview(fileInput) {
+				var file = fileInput.files[0]
 				if(/image\/\w+/.test(file.type)) {
 					if(window.FileReader) {
 						var fr = new FileReader()
 						fr.onloadend = function() {
-							target.attr('src', this.result)
+							$('#housePhoto').attr('src', this.result)
 						}
 						fr.readAsDataURL(file)
 					}

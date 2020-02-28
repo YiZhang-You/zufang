@@ -3,13 +3,7 @@ from rest_framework.pagination import PageNumberPagination, CursorPagination
 from django_filters import filterset
 from rest_framework.response import Response
 
-from api.consts import TEL_PATTERN
 from common.models import Estate, HouseInfo
-
-
-def check_tel(tel):
-    """检查手机号是否合法"""
-    return TEL_PATTERN.fullmatch(tel) is not None
 
 
 class DefaultResponse(Response):

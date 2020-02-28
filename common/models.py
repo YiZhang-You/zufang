@@ -196,9 +196,11 @@ class HousePhoto(models.Model):
     # 图片ID
     photoid = models.AutoField(primary_key=True)
     # 图片对应的房源
-    house = models.ForeignKey(to=HouseInfo, on_delete=models.DO_NOTHING, db_column='houseid')
+    house = models.ForeignKey(to=HouseInfo, on_delete=models.DO_NOTHING, db_column='houseid', null=True)
     # 图片资源路径
     path = models.CharField(max_length=255)
+    # 是否主图
+    ismain = models.BooleanField(default=False)
 
     class Meta:
         managed = False

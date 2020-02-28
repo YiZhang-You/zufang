@@ -20,18 +20,23 @@ app = celery.Celery(
 )
 
 # 直接通过代码修改Celery相关配置
+# http://docs.celeryproject.org/en/latest/userguide/configuration.html
 app.conf.update(
+    # 接受的内容
+    accept_content=['json', 'pickle'],
+    # 任务序列化方式
+    task_serializer='pickle',
+    # 任务执行结果序列化方式
+    result_serializer='json',
+    # 时区设置
     timezone=settings.TIME_ZONE,
+    # 启用协调世界时
     enable_utc=True,
-    # 定时任务（计划任务）相当于是消息的生产者
-    # 如果只有生产者没有消费者那么消息就会在消息队列中积压
-    # 将来实际部署项目的时候生产者、消费者、消息队列可能都是不同节点
-    # celery -A zufang beat -l debug ---> 消息的生产者
-    # celery -A zufang worker -l debug ---> 消息的消费者
+    # 配置定时任务
     beat_schedule={
         'task1': {
-            'task': 'common.tasks.remove_expired_record',
-            'schedule': crontab('*', '*', '*', '*', '*'),
+            'task': 'common.tasks.remove_expired_records',
+            'schedule': crontab('0', '2', '*', '*', '*'),
             'args': ()
         },
     },

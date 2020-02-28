@@ -24,9 +24,11 @@ def get_ip_address(request):
     return ip or request.META['REMOTE_ADDR']
 
 
-def to_md5_hex(origin_str):
+def to_md5_hex(data):
     """生成MD5摘要"""
-    return hashlib.md5(origin_str.encode('utf-8')).hexdigest()
+    if type(data) == str:
+        data = data.encode()
+    return hashlib.md5(data).hexdigest()
 
 
 def gen_mobile_code(length=6):
@@ -91,7 +93,8 @@ def upload_file_to_qiniu(file_path, filename):
 def upload_stream_to_qiniu(file_stream, filename, size):
     """将数据流上传到七牛云存储"""
     token = AUTH.upload_token(QINIU_BUCKET_NAME, filename)
-    return qiniu.put_stream(token, filename, file_stream, None, size)
+    result, *_ = qiniu.put_stream(token, filename, file_stream, None, size)
+    return result
 
 
 # def url_from_key(file_key):

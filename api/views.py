@@ -1,6 +1,9 @@
 import datetime
+import os
+import random
 
 import jwt
+import ujson
 from django.core.cache import caches
 from django.db.models import Prefetch, Q
 from django.db.transaction import atomic
@@ -8,46 +11,64 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
+from django_redis import get_redis_connection
 from rest_framework.decorators import api_view, action
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
-from api.consts import *
-from api.helpers import EstateFilterSet, HouseInfoFilterSet, check_tel, DefaultResponse
-from api.serializers import *
-from common.models import District, Agent, HouseType, Tag, User, LoginLog
-from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, get_ip_address
+from api.consts import MAX_PHOTO_SIZE, FILE_UPLOAD_SUCCESS, FILE_SIZE_EXCEEDED, \
+    CODE_TOO_FREQUENCY, MOBILE_CODE_SUCCESS, INVALID_TEL_NUM, USER_LOGIN_SUCCESS, \
+    USER_LOGIN_FAILED, INVALID_LOGIN_INFO
+from api.helpers import EstateFilterSet, HouseInfoFilterSet, DefaultResponse
+from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, \
+    AgentCreateSerializer, AgentDetailSerializer, AgentSimpleSerializer, \
+    HouseTypeSerializer, TagSerializer, EstateCreateSerializer, \
+    EstateDetailSerializer, EstateSimpleSerializer, HouseInfoDetailSerializer, \
+    HousePhotoSerializer, HouseInfoCreateSerializer, HouseInfoSimpleSerializer, \
+    UserCreateSerializer, UserUpdateSerializer, UserSimpleSerializer, RoleSimpleSerializer
+from common.models import District, Agent, HouseType, Tag, User, LoginLog, \
+    HousePhoto, Estate, HouseInfo, Role
+from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, \
+    get_ip_address, upload_stream_to_qiniu
+from common.validators import check_tel
 from zufang.settings import SECRET_KEY
+
+
+@api_view(('POST', ))
+def upload_house_photo(request):
+    file_obj = request.FILES.get('mainphoto')
+    if len(file_obj) < MAX_PHOTO_SIZE:
+        prefix = to_md5_hex(file_obj.file.getvalue())
+        filename = f'{prefix}{os.path.splitext(file_obj.name)[1]}'
+        upload_stream_to_qiniu.delay(file_obj, filename, len(file_obj))
+        photo = HousePhoto()
+        photo.path = f'http://q69nr46pe.bkt.clouddn.com/{filename}'
+        photo.ismain = True
+        photo.save()
+        resp = DefaultResponse(*FILE_UPLOAD_SUCCESS, data={
+            'photoid': photo.photoid,
+            'url': photo.path
+        })
+    else:
+        resp = DefaultResponse(*FILE_SIZE_EXCEEDED)
+    return resp
 
 
 @api_view(('GET', ))
 def get_code_by_sms(request, tel):
     """获取短信验证码"""
     if check_tel(tel):
-        if caches['default'].get(tel):
+        if caches['default'].get(f'{tel}:block'):
             resp = DefaultResponse(*CODE_TOO_FREQUENCY)
         else:
             code = gen_mobile_code()
             message = f'您的短信验证码是{code}，打死也不能告诉别人哟！【Python小课】'
-            # 通过异步化函数的delay方法让函数异步化的执行，这个地方就相当于是消息的生产者
-            # 如果要完成这个任务还需要消息的消费者，需要其他的进程来处理掉这条消息
-            # 消费者跟生产者可以是不同的机器（通常情况下也是如此）
-            # celery -A zufang worker -l debug
-            # send_sms_by_luosimao.delay(tel, message)
-            # task = send_sms_by_luosimao.s(countdown=10, expires=60)
-            # task.delay(tel, message)
-            send_sms_by_luosimao.apply_async(
-                (tel, message),
-                # {'tel': tel, 'message': message},
-                queue='queue1',
-                countdown=10,
-                # retry_policy={},
-                # expires=60,
-                # compression='zlib',
-            )
-            caches['default'].set(tel, code, timeout=120)
+            send_sms_by_luosimao.apply_async((tel, message),
+                                             countdown=random.random() * 5)
+            caches['default'].set(f'{tel}:block', code, timeout=120)
+            caches['default'].set(f'{tel}:valid', code, timeout=1800)
             resp = DefaultResponse(*MOBILE_CODE_SUCCESS)
     else:
         resp = DefaultResponse(*INVALID_TEL_NUM)
@@ -61,16 +82,19 @@ def login(request):
     password = request.data.get('password')
     if username and password:
         password = to_md5_hex(password)
-        user = User.objects.filter(
-            Q(username=username, password=password) |
-            Q(tel=username, password=password) |
+        q = Q(username=username, password=password) | \
+            Q(tel=username, password=password) | \
             Q(email=username, password=password)
-        ).first()
+        user = User.objects.filter(q).only('realname')\
+            .prefetch_related(
+                Prefetch('roles', queryset=Role.objects.all().only('roleid'))
+            ).first()
         if user:
+            roles = RoleSimpleSerializer(user.roles.all(), many=True).data
             # 用户登录成功通过JWT生成用户身份令牌
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
-                'data': {'userid': user.userid, }
+                'data': {'userid': user.userid, 'realname': user.realname, 'roles': roles}
             }
             token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode()
             with atomic():
@@ -93,6 +117,12 @@ def login(request):
     return resp
 
 
+@api_view(('DELETE', ))
+def logout(request):
+    """注销（销毁用户身份令牌）"""
+    pass
+
+
 @cache_page(timeout=365 * 86400)
 @api_view(('GET', ))
 def get_provinces(request):
@@ -105,17 +135,6 @@ def get_provinces(request):
         'message': '获取省级行政区域成功',
         'results': serializer.data
     })
-
-
-# @api_view(('GET', ))
-# def get_district(request, distid):
-#     """获取地区详情"""
-#     district = caches['default'].get(f'district:{distid}')
-#     if district is None:
-#         district = District.objects.filter(distid=distid).first()
-#         caches['default'].set(f'district:{distid}', district, timeout=900)
-#     serializer = DistrictDetailSerializer(district)
-#     return Response(serializer.data)
 
 
 @api_view(('GET', ))
@@ -265,3 +284,15 @@ class HouseInfoViewSet(ModelViewSet):
             return HouseInfoCreateSerializer
         return HouseInfoDetailSerializer if self.action == 'retrieve' \
             else HouseInfoSimpleSerializer
+
+
+class UserViewSet(ModelViewSet):
+    """用户模型视图集"""
+    queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return UserCreateSerializer
+        elif self.action == 'update':
+            return UserUpdateSerializer
+        return UserSimpleSerializer
