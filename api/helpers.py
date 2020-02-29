@@ -1,16 +1,24 @@
+from functools import lru_cache
+
 import jwt
-from django.contrib.auth.models import AnonymousUser
 from django.db.models import Q, Prefetch
-from jwt import DecodeError
+from django_filters import filterset
+from jwt import InvalidTokenError
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.pagination import PageNumberPagination, CursorPagination
-from django_filters import filterset
 from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
+from rest_framework.throttling import SimpleRateThrottle
 
-from common.models import Estate, HouseInfo, Privilege, Role, User
+from common.models import Estate, HouseInfo, User, Role
 from zufang.settings import SECRET_KEY
+
+
+class CustomThrottle(SimpleRateThrottle):
+
+    def get_cache_key(self, request, view):
+        pass
 
 
 class DefaultResponse(Response):
@@ -35,11 +43,13 @@ class LoginRequiredAuthentication(BaseAuthentication):
         if token:
             try:
                 payload = jwt.decode(token, SECRET_KEY)
-                user = payload['data']
+                user = User()
+                user.userid = payload['data']['userid']
+                user.is_authenticated = True
                 return user, token
-            except DecodeError:
-                pass
-        raise AuthenticationFailed('请提供有效的身份标识')
+            except InvalidTokenError:
+                raise AuthenticationFailed('无效的令牌或令牌已过期')
+        raise AuthenticationFailed('请提供用户身份令牌')
 
 
 class RbacPermission(BasePermission):
@@ -47,14 +57,24 @@ class RbacPermission(BasePermission):
 
     # 返回True表示有操作权限，返回False表示没有操作权限
     def has_permission(self, request, view):
-        userid = request.user.get('userid')
-        user = User.objects.filter(userid=userid).first()
-        for role in user.roles.all():
-            for priv in role.privs.all():
-                if request.method == priv.method and \
-                        request.path == priv.url:
-                    return True
+        privs = get_privs_by_userid(request.user.userid)
+        for priv in privs:
+            if request.path.startswith(priv.url) and \
+                    request.method == priv.method:
+                return True
         return False
+
+
+@lru_cache(maxsize=256)
+def get_privs_by_userid(userid):
+    user = User.objects.filter(userid=userid)\
+        .prefetch_related(
+            Prefetch(
+                'roles',
+                queryset=Role.objects.all().prefetch_related('privs'))
+        ).first()
+    return [priv for role in user.roles.all()
+            for priv in role.privs.all()]
 
 
 class CustomPagePagination(PageNumberPagination):
