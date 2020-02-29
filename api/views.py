@@ -21,7 +21,8 @@ from rest_framework.viewsets import ModelViewSet
 from api.consts import MAX_PHOTO_SIZE, FILE_UPLOAD_SUCCESS, FILE_SIZE_EXCEEDED, \
     CODE_TOO_FREQUENCY, MOBILE_CODE_SUCCESS, INVALID_TEL_NUM, USER_LOGIN_SUCCESS, \
     USER_LOGIN_FAILED, INVALID_LOGIN_INFO
-from api.helpers import EstateFilterSet, HouseInfoFilterSet, DefaultResponse, LoginRequiredAuthentication
+from api.helpers import EstateFilterSet, HouseInfoFilterSet, DefaultResponse, \
+    LoginRequiredAuthentication, RbacPermission
 from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, \
     AgentCreateSerializer, AgentDetailSerializer, AgentSimpleSerializer, \
     HouseTypeSerializer, TagSerializer, EstateCreateSerializer, \
@@ -87,18 +88,13 @@ def login(request):
             Q(tel=username, password=password) | \
             Q(email=username, password=password)
         user = User.objects.filter(q)\
-            .only('username', 'realname', 'roles')\
-            .prefetch_related(
-                Prefetch('roles', queryset=Role.objects.all().only('roleid'))
-            ).first()
+            .only('username', 'realname').first()
         if user:
-            roles = RoleSimpleSerializer(user.roles.all(), many=True).data
             # 用户登录成功通过JWT生成用户身份令牌
             payload = {
                 'exp': datetime.datetime.utcnow() + datetime.timedelta(days=1),
                 'data': {
                     'userid': user.userid,
-                    'roles': roles
                 }
             }
             token = jwt.encode(payload, SECRET_KEY, algorithm='HS256').decode()
@@ -127,6 +123,9 @@ def login(request):
 @api_view(('DELETE', ))
 def logout(request):
     """注销（销毁用户身份令牌）"""
+    # 如果使用了JWT这种方式通过令牌进行用户身份认证
+    # 如何彻底让令牌失效??? ---> Redis用集合类型做一个失效令牌清单
+    # 定时任务从失效令牌清单中清理过期令牌避免集合元素过多
     pass
 
 
@@ -238,6 +237,7 @@ class EstateViewSet(ModelViewSet):
     ordering = '-hot'
     ordering_fields = ('district', 'hot', 'name')
     authentication_classes = (LoginRequiredAuthentication, )
+    permission_classes = (RbacPermission, )
 
     def get_queryset(self):
         if self.action == 'list':

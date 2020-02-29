@@ -1,13 +1,15 @@
 import jwt
-from django.db.models import Q
+from django.contrib.auth.models import AnonymousUser
+from django.db.models import Q, Prefetch
 from jwt import DecodeError
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.pagination import PageNumberPagination, CursorPagination
 from django_filters import filterset
+from rest_framework.permissions import BasePermission
 from rest_framework.response import Response
 
-from common.models import Estate, HouseInfo
+from common.models import Estate, HouseInfo, Privilege, Role, User
 from zufang.settings import SECRET_KEY
 
 
@@ -38,6 +40,21 @@ class LoginRequiredAuthentication(BaseAuthentication):
             except DecodeError:
                 pass
         raise AuthenticationFailed('请提供有效的身份标识')
+
+
+class RbacPermission(BasePermission):
+    """RBAC授权"""
+
+    # 返回True表示有操作权限，返回False表示没有操作权限
+    def has_permission(self, request, view):
+        userid = request.user.get('userid')
+        user = User.objects.filter(userid=userid).first()
+        for role in user.roles.all():
+            for priv in role.privs.all():
+                if request.method == priv.method and \
+                        request.path == priv.url:
+                    return True
+        return False
 
 
 class CustomPagePagination(PageNumberPagination):
