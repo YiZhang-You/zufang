@@ -22,3 +22,4 @@ boto3
 ujson
 flower
 django-celery-results
+alipay-sdk-python

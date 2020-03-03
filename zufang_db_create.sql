@@ -119,6 +119,7 @@ create table `tb_house_photo`
    `photoid`              int not null auto_increment comment '编号',
    `houseid`              int not null comment '房源',
    `path`                 varchar(255) not null comment '资源路径',
+   `ismain`               boolean default 0 comment '是否主图',
    primary key (`photoid`)
 );
 

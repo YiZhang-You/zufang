@@ -25,7 +25,7 @@ SECRET_KEY = 'edrnuun9k1^2j0extzeb-%mgh6zizvhdqr)zskz0xvgz2l8b&b'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'django_filters',
     'common',
+    'backend',
     'django_celery_results',
 ]
 
@@ -150,10 +151,52 @@ DATABASES = {
         'CHARSET': 'utf8',
         'TIME_ZONE': 'Asia/Shanghai',
     },
+    'slave1': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zufang',
+        'HOST': '120.77.222.217',
+        'PORT': 3308,
+        'USER': 'luohao1',
+        'PASSWORD': 'Luohao.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/Shanghai',
+    },
+    'slave2': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zufang',
+        'HOST': '120.77.222.217',
+        'PORT': 3309,
+        'USER': 'luohao2',
+        'PASSWORD': 'Luohao.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/Shanghai',
+    },
+    'slave3': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'zufang',
+        'HOST': '120.77.222.217',
+        'PORT': 3310,
+        'USER': 'luohao3',
+        'PASSWORD': 'Luohao.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/Shanghai',
+    },
+    'backend': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'hrs',
+        'HOST': '120.77.222.217',
+        'PORT': 3307,
+        'USER': 'luohao',
+        'PASSWORD': 'Luohao.618',
+        'CHARSET': 'utf8',
+        'TIME_ZONE': 'Asia/Shanghai',
+    }
 }
 
-# # 数据库路由配置
-# DATABASE_ROUTERS = []
+# 数据库路由配置
+DATABASE_ROUTERS = [
+    'common.db_routers.MasterSlaveRouter',
+]
 
 # 缓存配置
 CACHES = {
@@ -214,6 +257,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
+STATIC_ROOT = '/root/project/stat'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
@@ -253,7 +297,7 @@ MEDIA_URL = '/media/'
 #             'when': 'W0',
 #             'backupCount': 12,
 #             'formatter': 'simple',
-#             'level': 'INFO',
+#             'level': 'DEBUG',
 #         },
 #         'file2': {
 #             'class': 'logging.handlers.TimedRotatingFileHandler',

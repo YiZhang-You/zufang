@@ -5,6 +5,11 @@
 		<title>租房网 - 首页</title>
 		<link rel="stylesheet" href="/static/css/style.css">
         <link rel="stylesheet" href="/static/css/head.css">
+		<style>
+			[v-cloak] {
+				display: none;
+			}
+		</style>
 	</head>
 	<body>
         <div id="header" class="wrap">
@@ -99,7 +104,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="app" class="main wrap">
+		<div id="app1" v-cloak class="main wrap">
 			<table class="house-list">
 				<tr v-for="house in houseinfos">
 					<td class="house-thumb">
@@ -124,6 +129,7 @@
 					</td>
 					<td class="house-type">{{ house.type.name }}</td>
 					<td class="house-price"><span>{{ house.price }}</span>{{ house.priceunit }}</td>
+					<td><button class="house-pay" @click="gotoPaymentPage(house.houseid)">付款预定</button></td>
 				</tr>
 			</table>
 			<div class="pager">
@@ -152,7 +158,7 @@
 		<script src="https://cdn.bootcss.com/vue/2.6.10/vue.min.js"></script>
 		<script>
 			const app1 = new Vue({
-				el: '#app',
+				el: '#app1',
 				data: {
 					houseinfos: [],
 				},
@@ -162,6 +168,20 @@
 						.then(json => {
 							this.houseinfos = json.results
 						})
+				},
+				methods: {
+					gotoPaymentPage(houseId) {
+						let url = `/api/payments/${houseId}/`
+						fetch(url, {
+							headers: {
+								'token': localStorage.token
+							}
+						})
+							.then(resp => resp.json)
+							.then(json => {
+								location.href = json.url
+							})
+					}
 				}
 			})
 		</script>

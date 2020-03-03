@@ -30,11 +30,35 @@ from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, 
     HousePhotoSerializer, HouseInfoCreateSerializer, HouseInfoSimpleSerializer, \
     UserCreateSerializer, UserUpdateSerializer, UserSimpleSerializer, RoleSimpleSerializer
 from common.models import District, Agent, HouseType, Tag, User, LoginLog, \
-    HousePhoto, Estate, HouseInfo, Role
+    HousePhoto, Estate, HouseInfo
 from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, \
     get_ip_address, upload_stream_to_qiniu
 from common.validators import check_tel, check_username, check_email
 from zufang.settings import SECRET_KEY
+
+
+@api_view(('GET', ))
+def get_payment_page(request, houseid):
+    pass
+    # alipay = AliPay(
+    #     appid=settings.ALIPAY_APPID,
+    #     app_notify_url=None,
+    #     app_private_key_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "keys/app_private_key.pem"),
+    #     alipay_public_key_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "keys/alipay_public_key.pem"),
+    #     sign_type='RSA2',
+    #     debug=True
+    # )
+    #
+    # order_info = alipay.api_alipay_trade_page_pay(
+    #     out_trade_no=gen_order_id(houseid),
+    #     total_amount=str(1),
+    #     subject=f'租房预定_{houseid}',
+    #     return_url='http://120.77.222.217:8000/static/html/pay_success.html',
+    # )
+    #
+    # full_payment_url = f'{settings.ALIPAY_URL}?{order_info}'
+    #
+    # return DefaultResponse(data={'url': full_payment_url})
 
 
 @api_view(('POST', ))

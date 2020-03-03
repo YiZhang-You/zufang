@@ -4,9 +4,10 @@ from rest_framework.routers import SimpleRouter
 from api.views import get_provinces, get_district, HotCityView, \
     AgentViewSet, HouseTypeViewSet, EstateViewSet, TagViewSet, \
     HouseInfoViewSet, get_code_by_sms, login, UserViewSet, \
-    upload_house_photo, logout
+    upload_house_photo, logout, get_payment_page
 
 urlpatterns = [
+    path('payments/<int:houseid>/', get_payment_page),
     path('photos/', upload_house_photo),
     path('tokens/', login),
     path('tokens/<str:token>/', logout),
