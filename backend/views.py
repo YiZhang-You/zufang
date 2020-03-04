@@ -1,10 +1,29 @@
 import io
+import random
 from urllib.parse import quote
 
 import xlwt
-from django.http import HttpResponse
+from django.db.models import Avg
+from django.http import HttpResponse, JsonResponse
 
 from backend.models import Emp, Dept
+
+
+def get_bar_data(request):
+    queryset = Emp.objects.values('dept__name').annotate(avgsal=Avg('sal'))
+    names, sals = [], []
+    for result in queryset:
+        names.append(result['dept__name'])
+        sals.append('%.2f' % float(result['avgsal']))
+    return JsonResponse(data={
+        'names': names,
+        'sals': [
+            sals,
+            ['%.2f' % (random.randint(-1000, 1000) + float(sal)) for sal in sals],
+            ['%.2f' % (random.randint(-1000, 1000) + float(sal)) for sal in sals],
+            ['%.2f' % (random.randint(-1000, 1000) + float(sal)) for sal in sals],
+        ]
+    })
 
 
 def export_excel(request):
@@ -23,8 +42,7 @@ def export_excel(request):
             sheet.write(row + 1, col, value)
     buffer = io.BytesIO()
     wb.save(buffer)
-    resp = HttpResponse(buffer.getvalue())
-    resp['content-type'] = 'application/vnd.msexecl'
-    filename = quote('员工信息表.xls')
-    resp['content-disposition'] = f'attachment; filename="{filename}"'
+    resp = HttpResponse(buffer.getvalue(), content_type='application/vnd.msexecl')
+    filename = '员工信息表.xls'
+    resp['content-disposition'] = f'attachment; filename="{quote(filename)}"'
     return resp

@@ -8,6 +8,7 @@
 <body>
     <h1>前后端代码联调 - Vue + Element UI</h1>
     <hr>
+    <div id="main" style="width: 600px; height:400px;"></div>
     <div id="app1">
         <el-select v-model="provId" filterable placeholder="请选择" @change="selectProv">
             <el-option
@@ -73,6 +74,71 @@
                 @next-click="loadData(nextPage)">
         </el-pagination>
     </div>
+    <script src="https://cdn.bootcss.com/echarts/4.6.0/echarts.simple.min.js"></script>
+    <script>
+        // 基于准备好的dom，初始化echarts实例
+        let myChart = echarts.init(document.querySelector('#main'));
+
+        let labelOption = {
+            show: true,
+            position: 'insideBottom',
+            distance: 25,
+            align: 'left',
+            verticalAlign: 'middle',
+            rotate: 90,
+            formatter: '{c}  {a}',
+            fontSize: 12,
+        };
+
+        // 指定图表的配置项和数据
+        let option = {
+            color: ['#003366', '#006699', '#4cabce', '#e5323e'],
+            title: {
+                text: 'ECharts 入门示例'
+            },
+            tooltip: {},
+            legend: {
+                data:['一季度', '二季度', '三季度', '四季度']
+            },
+            xAxis: {
+                data: []
+            },
+            yAxis: {},
+            series: [
+                {
+                    name: '一季度',
+                    type: 'bar',
+                    label: labelOption,
+                },
+                {
+                    name: '二季度',
+                    type: 'bar',
+                    label: labelOption,
+                },
+                {
+                    name: '三季度',
+                    type: 'bar',
+                    label: labelOption,
+                },
+                {
+                    name: '四季度',
+                    type: 'bar',
+                    label: labelOption,
+                },
+            ]
+        };
+
+        // 前端通过异步请求获取图表数据
+        fetch('/bar/')
+            .then(resp => resp.json())
+            .then(json => {
+                option.xAxis.data = json.names
+                for (let i = 0; i < option.series.length; ++i) {
+                    option.series[i].data = json.sals[i]
+                }
+                myChart.setOption(option);
+            })
+    </script>
     <script src="https://cdn.bootcss.com/vue/2.6.11/vue.min.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script>
