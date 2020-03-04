@@ -20,6 +20,7 @@ from django.urls import path, include
 # from rest_framework.documentation import include_docs_urls
 from rest_framework_swagger.views import get_swagger_view
 
+from backend.views import export_excel
 from common.views import index, get_captcha
 
 schema_view = get_swagger_view(title='项目接口文档')
@@ -31,6 +32,7 @@ urlpatterns = [
     # path('api/docs/', include_docs_urls(title='项目接口文档')),
     path('api/docs/', schema_view),
     path('captcha/', get_captcha),
+    path('excel/', export_excel),
 ]
 
 urlpatterns += static(settings.MEDIA_URL,
