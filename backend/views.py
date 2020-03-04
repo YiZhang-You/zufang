@@ -4,18 +4,21 @@ from urllib.parse import quote
 
 import xlwt
 from django.db.models import Avg
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from rest_framework.decorators import api_view
 
+from api.helpers import DefaultResponse
 from backend.models import Emp, Dept
 
 
+@api_view(('GET', ))
 def get_bar_data(request):
     queryset = Emp.objects.values('dept__name').annotate(avgsal=Avg('sal'))
     names, sals = [], []
     for result in queryset:
         names.append(result['dept__name'])
         sals.append('%.2f' % float(result['avgsal']))
-    return JsonResponse(data={
+    return DefaultResponse(data={
         'names': names,
         'sals': [
             sals,
