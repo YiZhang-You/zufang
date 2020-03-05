@@ -28,7 +28,7 @@ from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, 
     HouseTypeSerializer, TagSerializer, EstateCreateSerializer, \
     EstateDetailSerializer, EstateSimpleSerializer, HouseInfoDetailSerializer, \
     HousePhotoSerializer, HouseInfoCreateSerializer, HouseInfoSimpleSerializer, \
-    UserCreateSerializer, UserUpdateSerializer, UserSimpleSerializer, RoleSimpleSerializer
+    UserCreateSerializer, UserUpdateSerializer, UserSimpleSerializer
 from common.models import District, Agent, HouseType, Tag, User, LoginLog, \
     HousePhoto, Estate, HouseInfo
 from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, \

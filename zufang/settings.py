@@ -151,36 +151,36 @@ DATABASES = {
         'CHARSET': 'utf8',
         'TIME_ZONE': 'Asia/Shanghai',
     },
-    'slave1': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'zufang',
-        'HOST': '120.77.222.217',
-        'PORT': 3308,
-        'USER': 'luohao1',
-        'PASSWORD': 'Luohao.618',
-        'CHARSET': 'utf8',
-        'TIME_ZONE': 'Asia/Shanghai',
-    },
-    'slave2': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'zufang',
-        'HOST': '120.77.222.217',
-        'PORT': 3309,
-        'USER': 'luohao2',
-        'PASSWORD': 'Luohao.618',
-        'CHARSET': 'utf8',
-        'TIME_ZONE': 'Asia/Shanghai',
-    },
-    'slave3': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'zufang',
-        'HOST': '120.77.222.217',
-        'PORT': 3310,
-        'USER': 'luohao3',
-        'PASSWORD': 'Luohao.618',
-        'CHARSET': 'utf8',
-        'TIME_ZONE': 'Asia/Shanghai',
-    },
+    # 'slave1': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'zufang',
+    #     'HOST': '120.77.222.217',
+    #     'PORT': 3308,
+    #     'USER': 'luohao1',
+    #     'PASSWORD': 'Luohao.618',
+    #     'CHARSET': 'utf8',
+    #     'TIME_ZONE': 'Asia/Shanghai',
+    # },
+    # 'slave2': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'zufang',
+    #     'HOST': '120.77.222.217',
+    #     'PORT': 3309,
+    #     'USER': 'luohao2',
+    #     'PASSWORD': 'Luohao.618',
+    #     'CHARSET': 'utf8',
+    #     'TIME_ZONE': 'Asia/Shanghai',
+    # },
+    # 'slave3': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'zufang',
+    #     'HOST': '120.77.222.217',
+    #     'PORT': 3310,
+    #     'USER': 'luohao3',
+    #     'PASSWORD': 'Luohao.618',
+    #     'CHARSET': 'utf8',
+    #     'TIME_ZONE': 'Asia/Shanghai',
+    # },
     'backend': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hrs',
@@ -195,7 +195,8 @@ DATABASES = {
 
 # 数据库路由配置
 DATABASE_ROUTERS = [
-    'common.db_routers.MasterSlaveRouter',
+    'common.db_routers.MultiDbRouter',
+    # 'common.db_routers.MasterSlaveRouter',
 ]
 
 # 缓存配置
@@ -211,6 +212,7 @@ CACHES = {
             'CONNECTION_POOL_KWARGS': {
                 'max_connections': 2048,
             },
+            'PASSWORD': 'fuckingminers'
         }
     },
 }

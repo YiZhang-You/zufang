@@ -16,7 +16,7 @@ requests
 celery
 itsdangerous
 elasticsearch
-PyMySQL
+mysqlclient
 pillow
 boto3
 ujson

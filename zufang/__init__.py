@@ -1,11 +1,11 @@
 import os
 
 import celery
-import pymysql
+# import pymysql
 from celery.schedules import crontab
 from django.conf import settings
 
-pymysql.install_as_MySQLdb()
+# pymysql.install_as_MySQLdb()
 
 # 加载Django项目配置
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'zufang.settings')
