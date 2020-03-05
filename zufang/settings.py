@@ -144,7 +144,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'zufang',
-        'HOST': '120.77.222.217',
+        'HOST': '172.18.61.250',
         'PORT': 3306,
         'USER': 'luohao',
         'PASSWORD': 'Luohao.618',
@@ -184,7 +184,7 @@ DATABASES = {
     'backend': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'hrs',
-        'HOST': '120.77.222.217',
+        'HOST': '172.18.61.250',
         'PORT': 3307,
         'USER': 'luohao',
         'PASSWORD': 'Luohao.618',
@@ -204,7 +204,7 @@ CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
         'LOCATION': [
-            'redis://120.77.222.217:6379/0',
+            'redis://172.18.61.250:6379/0',
         ],
         'KEY_PREFIX': 'zufang',
         'OPTIONS': {
