@@ -4,6 +4,10 @@ import random
 
 import jwt
 import ujson
+from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
+from alipay.aop.api.domain.SettleDetailInfo import SettleDetailInfo
+from alipay.aop.api.domain.SettleInfo import SettleInfo
+from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
 from django.core.cache import caches
 from django.db.models import Prefetch, Q
 from django.db.transaction import atomic
@@ -12,7 +16,7 @@ from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django_filters.rest_framework import DjangoFilterBackend
 from django_redis import get_redis_connection
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action, authentication_classes
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -29,6 +33,7 @@ from api.serializers import DistrictSimpleSerializer, DistrictDetailSerializer, 
     EstateDetailSerializer, EstateSimpleSerializer, HouseInfoDetailSerializer, \
     HousePhotoSerializer, HouseInfoCreateSerializer, HouseInfoSimpleSerializer, \
     UserCreateSerializer, UserUpdateSerializer, UserSimpleSerializer
+from common.consts import alipay_client
 from common.models import District, Agent, HouseType, Tag, User, LoginLog, \
     HousePhoto, Estate, HouseInfo
 from common.utils import gen_mobile_code, send_sms_by_luosimao, to_md5_hex, \
@@ -38,27 +43,40 @@ from zufang.settings import SECRET_KEY
 
 
 @api_view(('GET', ))
+# @authentication_classes((LoginRequiredAuthentication, ))
 def get_payment_page(request, houseid):
-    pass
-    # alipay = AliPay(
-    #     appid=settings.ALIPAY_APPID,
-    #     app_notify_url=None,
-    #     app_private_key_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "keys/app_private_key.pem"),
-    #     alipay_public_key_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), "keys/alipay_public_key.pem"),
-    #     sign_type='RSA2',
-    #     debug=True
-    # )
-    #
-    # order_info = alipay.api_alipay_trade_page_pay(
-    #     out_trade_no=gen_order_id(houseid),
-    #     total_amount=str(1),
-    #     subject=f'租房预定_{houseid}',
-    #     return_url='http://120.77.222.217:8000/static/html/pay_success.html',
-    # )
-    #
-    # full_payment_url = f'{settings.ALIPAY_URL}?{order_info}'
-    #
-    # return DefaultResponse(data={'url': full_payment_url})
+    # https://opendocs.alipay.com/apis/api_1/alipay.trade.page.pay
+    model = AlipayTradePagePayModel()
+    # 产品订单号
+    model.out_trade_no = '202003051646520001'
+    # 订单总金额
+    model.total_amount = 200
+    # 订单主题
+    model.subject = '租房订金'
+    # model.body = '支付宝测试'
+    # 销售产品码，与支付宝签约的产品码名称。 注：目前仅支持FAST_INSTANT_TRADE_PAY
+    model.product_code = 'FAST_INSTANT_TRADE_PAY'
+    # 结算详细信息
+    settle_detail_info = SettleDetailInfo()
+    settle_detail_info.amount = 200
+    # 结算收款方的账户类型
+    settle_detail_info.trans_in_type = 'cardAliasNo'
+    # 结算收款方
+    settle_detail_info.trans_in = '6216603100004601162'
+    settle_detail_infos = list()
+    settle_detail_infos.append(settle_detail_info)
+    # 结算信息
+    settle_info = SettleInfo()
+    settle_info.settle_detail_infos = settle_detail_infos
+    model.settle_info = settle_info
+    # sub_merchant = SubMerchant()
+    # sub_merchant.merchant_id = '2088102180149774'
+    # model.sub_merchant = sub_merchant
+    request = AlipayTradePagePayRequest(biz_model=model)
+    url = alipay_client.page_execute(request, http_method='GET')
+    # 此处应该补充生成交易流水的代码 ---> Model
+    # 将用户信息、房源信息、交易编号、交易金额、交易时间、交易状态、……写入数据库
+    return DefaultResponse(data={'url': url})
 
 
 @api_view(('POST', ))

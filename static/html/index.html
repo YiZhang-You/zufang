@@ -173,11 +173,11 @@
 					gotoPaymentPage(houseId) {
 						let url = `/api/payments/${houseId}/`
 						fetch(url, {
-							headers: {
-								'token': localStorage.token
-							}
+							// headers: {
+							// 'token': localStorage.token
+							// }
 						})
-							.then(resp => resp.json)
+							.then(resp => resp.json())
 							.then(json => {
 								location.href = json.url
 							})
