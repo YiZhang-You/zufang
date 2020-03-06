@@ -7,6 +7,7 @@ import ujson
 from alipay.aop.api.domain.AlipayTradePagePayModel import AlipayTradePagePayModel
 from alipay.aop.api.domain.SettleDetailInfo import SettleDetailInfo
 from alipay.aop.api.domain.SettleInfo import SettleInfo
+from alipay.aop.api.request import AlipayTradeQueryRequest
 from alipay.aop.api.request.AlipayTradePagePayRequest import AlipayTradePagePayRequest
 from django.core.cache import caches
 from django.db.models import Prefetch, Q
@@ -76,6 +77,11 @@ def get_payment_page(request, houseid):
     url = alipay_client.page_execute(request, http_method='GET')
     # 此处应该补充生成交易流水的代码 ---> Model
     # 将用户信息、房源信息、交易编号、交易金额、交易时间、交易状态、……写入数据库
+
+    # 还需要一个设计一个接口作为接收通知的接口其中包括对订单交易结果的查询
+    # 最后还要更新之前的交易流水信息
+    # request = AlipayTradeQueryRequest(biz_model=model)
+    # content = alipay_client.page_execute(request)
     return DefaultResponse(data={'url': url})
 
 
