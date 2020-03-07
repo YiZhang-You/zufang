@@ -46,6 +46,7 @@ alipay_client_config.alipay_public_key = 'MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQ
 # 支付成功返回的页面是自己定制的 备案的域名可以跟服务器IP地址绑定（配置域名解析即可）
 # 此处必须写完整的URL
 alipay_client_config.return_url = 'http://jackfrued.top:8000/static/html/pay_success.html'
+alipay_client_config.notify_url = 'http://jackfrued.top:8000/api/get_alipay_notification/'
 
 # 支付宝客户端对象
 alipay_client = DefaultAlipayClient(alipay_client_config=alipay_client_config, logger=logger)

@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from dynaconf import settings as sts
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -21,6 +23,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'edrnuun9k1^2j0extzeb-%mgh6zizvhdqr)zskz0xvgz2l8b&b'
+# SECRET_KEY = os.environ['SECRET_KEY']
+# SECRET_KEY = sts.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -186,7 +190,7 @@ DATABASES = {
         'NAME': 'hrs',
         'HOST': '172.18.61.250',
         'PORT': 3307,
-        'USER': 'luohao',
+        'USER': sts.get('DB_USER'),
         'PASSWORD': 'Luohao.618',
         'CHARSET': 'utf8',
         'TIME_ZONE': 'Asia/Shanghai',
@@ -327,15 +331,15 @@ MEDIA_URL = '/media/'
 # # 自动重定向到安全连接
 # SECURE_SSL_REDIRECT = True
 
-# # 避免浏览器自作聪明推断内容类型（避免跨站脚本攻击风险）
-# SECURE_CONTENT_TYPE_NOSNIFF = True
+# 避免浏览器自作聪明推断内容类型（避免跨站脚本攻击风险）
+SECURE_CONTENT_TYPE_NOSNIFF = True
 
-# # 避免跨站脚本攻击
-# SECURE_BROWSER_XSS_FILTER = True
+# 避免跨站脚本攻击(XSS)
+SECURE_BROWSER_XSS_FILTER = True
 
 # # COOKIE只能通过HTTPS进行传输
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
 
-# # 防止点击劫持攻击手段（不允许使用<iframe>标签进行加载）
-# X_FRAME_OPTIONS = 'DENY'
+# 防止点击劫持攻击手段（不允许使用<iframe>标签进行加载）
+X_FRAME_OPTIONS = 'DENY'

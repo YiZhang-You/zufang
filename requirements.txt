@@ -24,3 +24,5 @@ flower
 django-celery-results
 alipay-sdk-python
 elasticsearch-dsl
+sentry-sdk
+dynaconf

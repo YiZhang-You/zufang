@@ -1,11 +1,28 @@
 import os
 
 import celery
+# import sentry_sdk
 # import pymysql
 from celery.schedules import crontab
 from django.conf import settings
 
 # pymysql.install_as_MySQLdb()
+
+# sentry_sdk.init("https://8afe52973694471eb1541d0eab19c517@sentry.io/3888861")
+# sentry_sdk.init("http://85d9cd6310d94955b6534d87a060ace2@120.77.222.217:9000/4")
+
+# import sentry_sdk
+# from sentry_sdk.integrations.django import DjangoIntegration
+#
+# sentry_sdk.init(
+#     dsn="https://c7cc09257cea45bfb0d5ae7872a190af@sentry.io/3910331",
+#     integrations=[DjangoIntegration()],
+#
+#     # If you wish to associate users to errors (assuming you are using
+#     # django.contrib.auth) you may enable sending PII data.
+#     send_default_pii=True
+# )
+
 
 # 加载Django项目配置
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'zufang.settings')
